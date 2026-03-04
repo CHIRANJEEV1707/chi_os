@@ -16,12 +16,12 @@ const Screensaver = () => {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    const squareSize = 32;
-    const fontSize = 16;
-    let x = Math.random() * (width - squareSize);
-    let y = Math.random() * (height - squareSize);
-    let dx = 2;
-    let dy = 2;
+    const squareSize = 64;
+    const fontSize = 24;
+    let x = width / 2 - squareSize / 2;
+    let y = height / 2 - squareSize / 2;
+    let dx = 2.5;
+    let dy = 2.5;
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
@@ -29,13 +29,13 @@ const Screensaver = () => {
       x += dx;
       y += dy;
 
-      if (x + squareSize >= width || x <= 0) {
+      if (x <= 0 || x + squareSize >= width) {
         dx = -dx;
       }
-      if (y + squareSize >= height || y <= 0) {
+      if (y <= 0 || y + squareSize >= height) {
         dy = -dy;
       }
-      
+
       x = Math.max(0, Math.min(x, width - squareSize));
       y = Math.max(0, Math.min(y, height - squareSize));
 
@@ -45,24 +45,26 @@ const Screensaver = () => {
       ctx.font = `${fontSize}px "Press Start 2P"`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#0A0F0A'; // A dark green from the theme
-      ctx.fillText('>_', x + squareSize / 2, y + squareSize / 2 + 1); // +1 for better vertical font centering
+      ctx.fillStyle = '#000000';
+      ctx.fillText('>_', x + squareSize / 2, y + squareSize / 2 + 2);
 
       animationFrameId = requestAnimationFrame(draw);
     };
-    
-    // Wait for fonts to be ready to avoid flicker/default font rendering
+
     document.fonts.ready.then(() => {
-        draw();
+      draw();
     });
 
     const handleResize = () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        // Re-set font on resize as context can be reset
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      x = width / 2 - squareSize / 2;
+      y = height / 2 - squareSize / 2;
+      if (ctx) {
         ctx.font = `${fontSize}px "Press Start 2P"`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -74,12 +76,10 @@ const Screensaver = () => {
   }, []);
 
   return (
-    <div
-      className={'fixed inset-0 z-[9999] bg-black/95'}
-    >
-      <canvas ref={canvasRef} className="w-full h-full" />
+    <div className="fixed inset-0 z-[9999] bg-black">
+      <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-primary font-headline animate-pulse">
-        PRESS ANY KEY TO CONTINUE...
+        PRESS ANY KEY OR MOVE MOUSE TO CONTINUE...
       </div>
     </div>
   );

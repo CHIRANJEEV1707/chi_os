@@ -16,15 +16,15 @@ export default function ChiruOS() {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    if (isIdle) {
+    if (isIdle && !renderScreensaver) {
       setIsExiting(false);
       setRenderScreensaver(true);
-    } else if (renderScreensaver) {
+    } else if (!isIdle && renderScreensaver) {
       setIsExiting(true);
       const timer = setTimeout(() => {
         setRenderScreensaver(false);
         setIsExiting(false);
-      }, 500); // Must match fade-out duration
+      }, 500); // This must match the fade-out animation duration
       return () => clearTimeout(timer);
     }
   }, [isIdle, renderScreensaver]);
@@ -39,8 +39,8 @@ export default function ChiruOS() {
           {renderScreensaver && (
             <div
               className={cn(
-                'animate-in fade-in duration-500',
-                isExiting && 'animate-out fade-out duration-500'
+                'fixed inset-0 z-[9998] animate-in fade-in-0 duration-500',
+                isExiting && 'animate-out fade-out-0 duration-500'
               )}
             >
               <Screensaver />

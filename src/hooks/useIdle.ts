@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * A hook to detect user idle state.
@@ -11,43 +11,31 @@ export const useIdle = (ms: number) => {
   const [isIdle, setIsIdle] = useState(false);
   const timeoutIdRef = useRef<NodeJS.Timeout>();
 
-  const resetTimer = useCallback(() => {
-    // If we are idle, an event brings us out of it.
-    if (isIdle) {
-      setIsIdle(false);
-    }
-    
-    // Clear any existing timer.
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-    }
-    
-    // Set a new timer.
-    timeoutIdRef.current = setTimeout(() => {
-      setIsIdle(true);
-    }, ms);
-  }, [ms, isIdle]);
-
   useEffect(() => {
-    const events = ['mousemove', 'keydown', 'click'];
-    
-    events.forEach(event => {
-      window.addEventListener(event, resetTimer);
-    });
-
-    // Start the timer initially.
-    resetTimer();
-
-    return () => {
-      // Cleanup: remove listeners and clear timer.
+    const handleActivity = () => {
+      setIsIdle(false);
       if (timeoutIdRef.current) {
         clearTimeout(timeoutIdRef.current);
       }
-      events.forEach(event => {
-        window.removeEventListener(event, resetTimer);
-      });
+      timeoutIdRef.current = setTimeout(() => {
+        setIsIdle(true);
+      }, ms);
     };
-  }, [resetTimer]); // The effect depends on resetTimer.
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll'];
+    events.forEach(event => window.addEventListener(event, handleActivity, { passive: true }));
+
+    // Initialize the timer
+    handleActivity();
+
+    // Cleanup function
+    return () => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
+      events.forEach(event => window.removeEventListener(event, handleActivity));
+    };
+  }, [ms]);
 
   return isIdle;
 };
