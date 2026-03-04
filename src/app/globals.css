@@ -60,7 +60,15 @@
 @layer base {
   * {
     @apply border-border;
+    cursor: url('/cursors/cursor-default.png'), auto;
   }
+  
+  button,
+  a,
+  [role="button"] {
+    cursor: url('/cursors/cursor-pointer.png'), pointer;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
