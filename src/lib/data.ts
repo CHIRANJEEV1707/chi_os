@@ -11,6 +11,14 @@ export const DESKTOP_ICONS = [
     { "id": "trash", "label": "RECYCLE.bin", "icon": "🗑️" }
 ];
 
+export const INITIAL_ICON_POSITIONS = DESKTOP_ICONS.map((icon, index) => ({
+    ...icon,
+    position: {
+        x: (index % 2) === 0 ? 24 : 120,
+        y: Math.floor(index / 2) * 96 + 24
+    }
+}));
+
 export const START_MENU_ITEMS = [
     { id: "about", "label": "About Chiranjeev", "icon": "user", "action": "open_window" },
     { id: "projects", "label": "Projects", "icon": "folder", "action": "open_window" },

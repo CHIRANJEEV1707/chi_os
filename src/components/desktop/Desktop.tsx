@@ -2,32 +2,47 @@
 
 import Wallpaper from './Wallpaper';
 import Icon from './Icon';
-import { DESKTOP_ICONS } from '@/lib/data';
 import { useWindowManager } from '@/hooks/useWindowManager';
 import { getPageComponent } from '../pages';
+import { useIconManager } from '@/hooks/useIconManager';
+import { useRef, useState, useEffect } from 'react';
 
 const Desktop = () => {
   const { openWindow } = useWindowManager();
+  const { icons } = useIconManager();
+  const desktopRef = useRef<HTMLDivElement>(null);
+  const [bounds, setBounds] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const measureDesktop = () => {
+      if (desktopRef.current) {
+        const { width, height } = desktopRef.current.getBoundingClientRect();
+        setBounds({ width, height });
+      }
+    };
+    measureDesktop();
+    window.addEventListener('resize', measureDesktop);
+    return () => window.removeEventListener('resize', measureDesktop);
+  }, []);
 
   const handleIconDoubleClick = (id: string, label: string) => {
     const PageComponent = getPageComponent(id);
-    if(PageComponent) {
-        openWindow(id, label, <PageComponent />);
+    if (PageComponent) {
+      openWindow(id, label, <PageComponent />);
     } else {
-        console.warn(`No page component found for ${id}`);
+      console.warn(`No page component found for ${id}`);
     }
   };
 
   return (
-    <div className="flex-grow w-full relative bg-desktop-bg overflow-hidden">
+    <div ref={desktopRef} className="flex-grow w-full relative bg-desktop-bg overflow-hidden">
       <Wallpaper />
-      <div className="absolute top-0 left-0 p-4 grid grid-cols-2 md:grid-cols-2 gap-x-5 gap-y-2">
-        {DESKTOP_ICONS.map(icon => (
+      <div className="absolute top-0 left-0 w-full h-full">
+        {icons.map(icon => (
           <Icon
             key={icon.id}
-            id={icon.id}
-            label={icon.label}
-            icon={icon.icon}
+            icon={icon}
+            bounds={bounds}
             onDoubleClick={() => handleIconDoubleClick(icon.id, icon.label)}
           />
         ))}

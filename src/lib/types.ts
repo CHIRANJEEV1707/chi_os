@@ -8,3 +8,11 @@ export interface WindowState {
   position: { x: number; y: number };
   size: { width: number | string; height: number | string };
 }
+
+export interface IconState {
+  id: string;
+  label: string;
+  icon: string;
+  position: { x: number; y: number };
+  zIndex: number;
+}

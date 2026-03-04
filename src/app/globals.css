@@ -69,6 +69,10 @@
     cursor: pointer;
   }
 
+  .react-draggable-dragging {
+    cursor: grabbing !important;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
