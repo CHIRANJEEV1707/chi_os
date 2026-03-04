@@ -60,13 +60,13 @@
 @layer base {
   * {
     @apply border-border;
-    cursor: url('/cursors/cursor-default.png'), auto;
+    cursor: crosshair;
   }
   
   button,
   a,
   [role="button"] {
-    cursor: url('/cursors/cursor-pointer.png'), pointer;
+    cursor: pointer;
   }
 
   body {
