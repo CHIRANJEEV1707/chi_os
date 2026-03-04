@@ -1,14 +1,14 @@
 export const DESKTOP_ICONS = [
-    { "id": "about", "label": "ABOUT.exe", "icon": "user_avatar" },
-    { "id": "projects", "label": "PROJECTS/", "icon": "folder" },
-    { "id": "skills", "label": "SKILLS.sys", "icon": "chip" },
-    { "id": "experience", "label": "EXPERIENCE/", "icon": "briefcase" },
-    { "id": "resume", "label": "RESUME.pdf", "icon": "document" },
-    { "id": "contact", "label": "CONTACT.sh", "icon": "terminal_square" },
-    { "id": "guestbook", "label": "GUESTBOOK.txt", "icon": "book" },
-    { "id": "games", "label": "GAMES/", "icon": "gamepad" },
-    { "id": "terminal", "label": "TERMINAL.exe", "icon": "prompt" },
-    { "id": "trash", "label": "RECYCLE.bin", "icon": "trash" }
+    { "id": "about", "label": "ABOUT.exe", "icon": "👤" },
+    { "id": "projects", "label": "PROJECTS/", "icon": "📁" },
+    { "id": "skills", "label": "SKILLS.sys", "icon": "⚙️" },
+    { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
+    { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
+    { "id": "contact", "label": "CONTACT.sh", "icon": "📡" },
+    { "id": "guestbook", "label": "GUESTBOOK.txt", "icon": "📖" },
+    { "id": "games", "label": "GAMES/", "icon": "🕹️" },
+    { "id": "terminal", "label": "TERMINAL.exe", "icon": ">_" },
+    { "id": "trash", "label": "RECYCLE.bin", "icon": "🗑️" }
 ];
 
 export const START_MENU_ITEMS = [
