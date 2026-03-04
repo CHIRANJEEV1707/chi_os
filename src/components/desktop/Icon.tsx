@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { cn } from '@/lib/utils';
 import { IconState } from '@/lib/types';
@@ -20,6 +20,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
   const [selected, setSelected] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const { updateIconPosition, focusIcon } = useIconManager();
+  const nodeRef = useRef(null);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,6 +44,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
 
   return (
     <Draggable
+      nodeRef={nodeRef}
       position={icon.position}
       onStart={() => setIsDragging(true)}
       onStop={onDragStop}
@@ -55,6 +57,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
       }}
     >
       <div
+        ref={nodeRef}
         className="absolute"
         style={{ zIndex: isDragging ? 50 : icon.zIndex }}
       >
