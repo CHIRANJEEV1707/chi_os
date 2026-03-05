@@ -243,12 +243,15 @@ export default function Minesweeper() {
     if (newDifficulty) setDifficulty(diff);
     dispatch({ type: 'RESTART', difficulty: diff });
     setTimer(0);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+    }
   }, [difficulty]);
 
   useEffect(() => {
     resetGame(difficulty);
-  }, [difficulty]);
+  }, [difficulty, resetGame]);
   
   useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -262,19 +265,19 @@ export default function Minesweeper() {
   }, [resetGame]);
 
   useEffect(() => {
-    if (state.isFirstClick === false && status === 'IDLE') {
-      const newStatus = 'PLAYING';
-      dispatch({ type: 'REVEAL_CELL', x: -1, y: -1 }); // Dummy call to transition state
-      if(timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = setInterval(() => {
-        setTimer(t => Math.min(t + 1, 999));
-      }, 1000);
-    }
-    
-    if (status === 'WON' || status === 'LOST') {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (status === 'PLAYING') {
+      if (!timerIntervalRef.current) {
+        timerIntervalRef.current = setInterval(() => {
+          setTimer(t => Math.min(t + 1, 999));
+        }, 1000);
+      }
+    } else if (status === 'WON' || status === 'LOST') {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
 
-      if(status === 'WON') {
+      if (status === 'WON') {
         play('success');
         if (timer < highScores[difficulty]) {
           const newHighScores = { ...highScores, [difficulty]: timer };
@@ -283,15 +286,18 @@ export default function Minesweeper() {
             localStorage.setItem(`chiru-os-mine-${difficulty.toLowerCase()}`, timer.toString());
           } catch {}
         }
-      } else {
+      } else { // status === 'LOST'
         play('error');
       }
     }
-  }, [state.isFirstClick, status, timer, difficulty, highScores, play]);
+  }, [status, timer, difficulty, highScores, play]);
 
   useEffect(() => {
     return () => {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
     }
   }, []);
 
