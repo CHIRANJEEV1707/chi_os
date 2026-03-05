@@ -84,6 +84,7 @@ export default function Invaders() {
     const invaderDirection = useRef<'left' | 'right'>('right');
     const invaderAnimationFrame = useRef(0);
     const invaderMoveTimer = useRef(0);
+    const invaderSpeedRef = useRef(0.5);
     const ufoSpawnTimer = useRef<NodeJS.Timeout | null>(null);
     const enemyShootTimer = useRef<NodeJS.Timeout | null>(null);
     const starfieldRef = useRef<{x:number, y:number, r:number}[]>([]);
@@ -148,6 +149,7 @@ export default function Invaders() {
         setWave(1);
         playerRef.current.x = CANVAS_WIDTH / 2 - PLAYER_WIDTH / 2;
         invaderDirection.current = 'right';
+        invaderSpeedRef.current = 0.5;
         createInvaders(1);
         createShields();
         playerBulletRef.current.active = false;
@@ -250,12 +252,11 @@ export default function Invaders() {
             // Update Invaders
             const aliveInvaders = invadersRef.current.filter(i => i.alive);
             const remainingCount = aliveInvaders.length;
-            const speed = 0.5 + (55 - remainingCount) * 0.04;
             let wallHit = false;
             let moveDown = false;
 
             if (invaderDirection.current === 'right') {
-                invadersRef.current.forEach(inv => inv.x += speed);
+                invadersRef.current.forEach(inv => inv.x += invaderSpeedRef.current);
                 const rightmostInvader = Math.max(...aliveInvaders.map(i => i.x + i.width));
                 if (rightmostInvader > CANVAS_WIDTH - 20) {
                     wallHit = true;
@@ -263,7 +264,7 @@ export default function Invaders() {
                     moveDown = true;
                 }
             } else { // moving left
-                invadersRef.current.forEach(inv => inv.x -= speed);
+                invadersRef.current.forEach(inv => inv.x -= invaderSpeedRef.current);
                 const leftmostInvader = Math.min(...aliveInvaders.map(i => i.x));
                 if (leftmostInvader < 20) {
                     wallHit = true;
@@ -323,6 +324,10 @@ export default function Invaders() {
                         invader.alive = false;
                         playerBulletRef.current.active = false;
                         setScore(s => s + invader.points);
+                        
+                        const newRemainingCount = invadersRef.current.filter(i => i.alive).length;
+                        invaderSpeedRef.current = 0.5 + (55 - newRemainingCount) * 0.04;
+                        
                         play('click');
                         break;
                     }
@@ -389,6 +394,7 @@ export default function Invaders() {
                 setTimeout(() => {
                     createInvaders(wave + 1);
                     invaderDirection.current = 'right';
+                    invaderSpeedRef.current = 0.5 + (wave * 0.1);
                     enemyBulletsRef.current = [];
                     setGameState('PLAYING');
                 }, 2000);
