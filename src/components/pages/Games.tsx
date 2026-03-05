@@ -1,15 +1,59 @@
 
 'use client';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import Snake from '@/components/games/Snake';
+import Minesweeper from '@/components/games/Minesweeper';
+
+type Game = 'menu' | 'snake' | 'minesweeper';
 
 export default function Games() {
-    // For now, this component just renders the Snake game.
-    // In the future, it could act as a menu or router for multiple games.
-    return (
-        <div className="w-full h-full">
-            <Snake />
-        </div>
-    );
-}
+    const [activeGame, setActiveGame] = useState<Game>('menu');
 
+    const renderContent = () => {
+        switch(activeGame) {
+            case 'snake':
+                return <Snake />;
+            case 'minesweeper':
+                return <Minesweeper />;
+            case 'menu':
+            default:
+                return (
+                     <div className="p-4 font-body flex flex-col items-center justify-center h-full gap-4 text-center">
+                        <h1 className="font-headline text-lg text-primary">GAMES/</h1>
+                        <p className="text-sm text-primary/80">Select a game to play.</p>
+                        <div className="flex flex-col md:flex-row gap-4 mt-4">
+                             <button
+                              onClick={() => setActiveGame('snake')}
+                              className="font-headline text-[10px] px-6 py-3 border-2 border-primary text-primary hover:bg-accent hover:text-accent-foreground flex flex-col items-center gap-2 w-40"
+                            >
+                              <span className="text-2xl">🐍</span>
+                              <span>SNAKE.exe</span>
+                            </button>
+                             <button
+                              onClick={() => setActiveGame('minesweeper')}
+                              className="font-headline text-[10px] px-6 py-3 border-2 border-primary text-primary hover:bg-accent hover:text-accent-foreground flex flex-col items-center gap-2 w-40"
+                            >
+                                <span className="text-2xl">💣</span>
+                                <span>MINESWEEPER.exe</span>
+                            </button>
+                        </div>
+                    </div>
+                );
+        }
+    };
     
+    return (
+        <div className="w-full h-full bg-black/50 relative">
+            {activeGame !== 'menu' && (
+                <button 
+                    onClick={() => setActiveGame('menu')}
+                    className="absolute top-2 left-2 font-headline text-[7px] px-2 py-1 border border-primary/50 text-primary hover:bg-accent hover:text-accent-foreground z-20"
+                >
+                    &lt; BACK
+                </button>
+            )}
+            {renderContent()}
+        </div>
+    )
+}

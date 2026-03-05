@@ -249,6 +249,34 @@
     .panel-5 { grid-area: panel-5; }
     .panel-6 { grid-area: panel-6; }
     
+    /* Minesweeper Styles */
+    .ms-cell {
+        @apply w-6 h-6 flex items-center justify-center font-headline text-xs select-none;
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+    }
+    .ms-cell-hidden {
+        @apply bg-[#001a00] cursor-pointer;
+        border-top: 2px solid #00ff41;
+        border-left: 2px solid #00ff41;
+        border-bottom: 2px solid #003300;
+        border-right: 2px solid #003300;
+    }
+    .ms-cell-hidden:active {
+        border-top: 2px solid #003300;
+        border-left: 2px solid #003300;
+        border-bottom: 2px solid #00ff41;
+        border-right: 2px solid #00ff41;
+    }
+    .ms-cell-hidden:hover {
+        @apply bg-[#002800];
+    }
+    .ms-cell-revealed {
+        @apply bg-[#000a00];
+        border: 1px solid #002200;
+    }
+
     /* Print-specific Styles */
     @media print {
         body * {
