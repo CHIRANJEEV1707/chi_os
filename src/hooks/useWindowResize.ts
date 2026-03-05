@@ -1,8 +1,6 @@
 'use client';
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useWindowStore } from '@/store/windowStore';
-
-const TASKBAR_HEIGHT = 40;
 
 const getCursorForDirection = (direction: string) => {
   if (direction.includes('n') || direction.includes('s')) {
@@ -20,130 +18,102 @@ const getCursorForDirection = (direction: string) => {
   return 'auto';
 };
 
-export const useWindowResize = (
-  windowId: string,
-  windowRef: React.RefObject<HTMLDivElement>,
-  desktopBounds: { width: number; height: number },
-  minWidth = 320,
-  minHeight = 200
-) => {
+export const useWindowResize = (windowId: string, minWidth = 320, minHeight = 200) => {
   const resizing = useRef<any>(null);
+  const { updateWindow } = useWindowStore();
   const [isResizing, setIsResizing] = useState(false);
-  const { updateWindowPosition, updateWindowSize } = useWindowStore();
 
   const onResizeMove = useCallback((e: MouseEvent) => {
     if (!resizing.current) return;
-    const { direction, startX, startY, startW, startH, startLeft, startTop } = resizing.current;
     
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
+    const {
+      direction,
+      startMouseX, startMouseY,
+      startW, startH,
+      startX, startY
+    } = resizing.current;
+
+    const dx = e.clientX - startMouseX;
+    const dy = e.clientY - startMouseY;
 
     let newW = startW;
     let newH = startH;
-    let newX = startLeft;
-    let newY = startTop;
+    let newX = startX;
+    let newY = startY;
 
-    if (direction.includes('e')) newW = Math.max(minWidth, startW + dx);
-    if (direction.includes('s')) newH = Math.max(minHeight, startH + dy);
+    if (direction === 'e' || direction === 'ne' || direction === 'se') {
+      newW = Math.max(minWidth, startW + dx);
+    }
 
-    if (direction.includes('w')) {
-      const newWidth = startW - dx;
-      if (newWidth >= minWidth) {
-        newW = newWidth;
-        newX = startLeft + dx;
+    if (direction === 's' || direction === 'se' || direction === 'sw') {
+      newH = Math.max(minHeight, startH + dy);
+    }
+
+    if (direction === 'w' || direction === 'nw' || direction === 'sw') {
+      const rawW = startW - dx;
+      if (rawW >= minWidth) {
+        newW = rawW;
+        newX = startX + dx;
       } else {
         newW = minWidth;
-        newX = startLeft + (startW - minWidth);
+        newX = startX + startW - minWidth;
       }
     }
-    if (direction.includes('n')) {
-      const newHeight = startH - dy;
-      if (newHeight >= minHeight) {
-        newH = newHeight;
-        newY = startTop + dy;
+
+    if (direction === 'n' || direction === 'nw' || direction === 'ne') {
+      const rawH = startH - dy;
+      if (rawH >= minHeight) {
+        newH = rawH;
+        newY = startY + dy;
       } else {
         newH = minHeight;
-        newY = startTop + (startH - minHeight);
+        newY = startY + startH - minHeight;
       }
     }
-    
-    // Max constraints
-    if (newX < 0) { newW += newX; newX = 0; }
-    if (newY < 0) { newH += newY; newY = 0; }
-    if (newX + newW > desktopBounds.width) { newW = desktopBounds.width - newX; }
-    if (newY + newH > desktopBounds.height - TASKBAR_HEIGHT) { newH = desktopBounds.height - TASKBAR_HEIGHT - newY; }
 
-    updateWindowSize(windowId, { width: newW, height: newH });
-    updateWindowPosition(windowId, { x: newX, y: newY });
-  }, [windowId, updateWindowSize, updateWindowPosition, minWidth, minHeight, desktopBounds]);
+    updateWindow(windowId, {
+      x: Math.round(newX),
+      y: Math.round(newY),
+      width: Math.round(newW),
+      height: Math.round(newH)
+    });
+  }, [windowId, minWidth, minHeight, updateWindow]);
 
   const onResizeEnd = useCallback(() => {
-    document.body.classList.remove('is-resizing');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    setIsResizing(false);
-
-    // Snap to grid
-    const { windows } = useWindowStore.getState();
-    const currentWindow = windows.find(w => w.id === windowId);
-    if (currentWindow) {
-      const snappedWidth = Math.round((currentWindow.size.width as number) / 4) * 4;
-      const snappedHeight = Math.round((currentWindow.size.height as number) / 4) * 4;
-      let snappedX = currentWindow.position.x;
-      let snappedY = currentWindow.position.y;
-      
-      if (resizing.current?.direction.includes('w')) {
-        snappedX = currentWindow.position.x + ((currentWindow.size.width as number) - snappedWidth);
-      }
-      if (resizing.current?.direction.includes('n')) {
-        snappedY = currentWindow.position.y + ((currentWindow.size.height as number) - snappedHeight);
-      }
-      
-      updateWindowSize(windowId, { width: snappedWidth, height: snappedHeight });
-      updateWindowPosition(windowId, { x: snappedX, y: snappedY });
-    }
-
     resizing.current = null;
     document.removeEventListener('mousemove', onResizeMove);
     document.removeEventListener('mouseup', onResizeEnd);
-  }, [onResizeMove, windowId, updateWindowSize, updateWindowPosition]);
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+    document.body.classList.remove('is-resizing');
+    setIsResizing(false);
+  }, [onResizeMove]);
 
   const onResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>, direction: string) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (!windowRef.current) return;
     
-    const { windows } = useWindowStore.getState();
-    const winState = windows.find(w => w.id === windowId);
-    if (!winState) return;
-
+    const windowEl = document.getElementById(`window-${windowId}`);
+    if (!windowEl) return;
+    const rect = windowEl.getBoundingClientRect();
+    
     resizing.current = {
-        direction,
-        startX: e.clientX,
-        startY: e.clientY,
-        startW: windowRef.current.offsetWidth,
-        startH: windowRef.current.offsetHeight,
-        startLeft: winState.position.x,
-        startTop: winState.position.y,
+      direction,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startW: rect.width,
+      startH: rect.height,
+      startX: rect.left,
+      startY: rect.top,
     };
-    
-    document.body.classList.add('is-resizing');
-    document.body.style.cursor = getCursorForDirection(direction);
-    document.body.style.userSelect = 'none';
-    setIsResizing(true);
-    
+
     document.addEventListener('mousemove', onResizeMove);
     document.addEventListener('mouseup', onResizeEnd);
-  }, [windowId, windowRef, onResizeMove, onResizeEnd]);
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = getCursorForDirection(direction);
+    document.body.classList.add('is-resizing');
+    setIsResizing(true);
+  }, [windowId, onResizeMove, onResizeEnd]);
   
-  useEffect(() => {
-    return () => {
-      if(resizing.current) {
-        onResizeEnd();
-      }
-    }
-  }, [onResizeEnd]);
-
   return { onResizeStart, isResizing };
 };

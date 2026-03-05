@@ -35,9 +35,8 @@ export default function Window({ windowState, desktopBounds }: WindowProps) {
     updateWindowPosition,
   } = useWindowStore();
   const nodeRef = useRef(null);
-  const windowWrapperRef = useRef<HTMLDivElement>(null);
 
-  const { onResizeStart, isResizing } = useWindowResize(windowState.id, windowWrapperRef, desktopBounds);
+  const { onResizeStart, isResizing } = useWindowResize(windowState.id);
 
   if (windowState.isMinimized) {
     return null;
@@ -84,10 +83,19 @@ export default function Window({ windowState, desktopBounds }: WindowProps) {
       }}
       disabled={windowState.isMaximized || isResizing}
     >
-      <div ref={nodeRef} className="absolute" style={{ zIndex: windowState.zIndex }} onMouseDown={handleFocus}>
+      <div
+        ref={nodeRef}
+        id={`window-${windowState.id}`}
+        className="absolute"
+        style={{
+          zIndex: windowState.zIndex,
+          width,
+          height,
+        }}
+        onMouseDown={handleFocus}
+      >
         <div
-          ref={windowWrapperRef}
-          style={{ width, height }}
+          style={{ width: '100%', height: '100%' }}
           className={cn(
             'flex flex-col overflow-visible',
             'bg-window-bg border-2 border-border text-primary shadow-lg',
