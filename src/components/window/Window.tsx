@@ -1,48 +1,113 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import TitleBar from './TitleBar';
 import { WindowState } from '@/lib/types';
-import { useWindowManager } from '@/hooks/useWindowManager';
+import { useWindowStore } from '@/store/windowStore';
+import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
+import { ResizableBox, ResizeCallbackData } from 'react-resizable';
 
 type WindowProps = {
-  window: WindowState;
+  windowState: WindowState;
+  desktopBounds: { width: number; height: number };
 };
 
-// Simplified Window without react-draggable/resizable
-export default function Window({ window }: WindowProps) {
-  const { closeWindow, focusWindow } = useWindowManager();
-  const [isClosing, setIsClosing] = useState(false);
+const TASKBAR_HEIGHT = 40;
 
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      closeWindow(window.id);
-    }, 300); // Match animation duration
+export default function Window({ windowState, desktopBounds }: WindowProps) {
+  const {
+    closeWindow,
+    focusWindow,
+    toggleMinimize,
+    toggleMaximize,
+    updateWindowPosition,
+    updateWindowSize,
+  } = useWindowStore();
+  const nodeRef = useRef(null);
+
+  if (windowState.isMinimized) {
+    return null;
+  }
+
+  const handleFocus = (e: React.MouseEvent) => {
+    // Prevent focus when clicking on buttons in title bar
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    focusWindow(windowState.id);
   };
 
+  const onDragStop = (_e: DraggableEvent, data: DraggableData) => {
+    if (!windowState.isMaximized) {
+      updateWindowPosition(windowState.id, { x: data.x, y: data.y });
+    }
+  };
+
+  const onResizeStop = (_e: React.SyntheticEvent, data: ResizeCallbackData) => {
+    if (!windowState.isMaximized) {
+      updateWindowSize(windowState.id, { width: data.size.width, height: data.size.height });
+    }
+  };
+
+  const width = windowState.isMaximized
+    ? desktopBounds.width
+    : typeof windowState.size.width === 'number'
+    ? windowState.size.width
+    : 640;
+  const height = windowState.isMaximized
+    ? desktopBounds.height - TASKBAR_HEIGHT
+    : typeof windowState.size.height === 'number'
+    ? windowState.size.height
+    : 420;
+
+  const position = windowState.isMaximized ? { x: 0, y: 0 } : windowState.position;
+
   return (
-    <div
-      className={cn(
-        "absolute top-1/4 left-1/4 w-1/2 min-w-[320px] min-h-[200px] flex flex-col",
-        "bg-window-bg border-2 border-border text-primary shadow-lg",
-        "animate-in fade-in-0 zoom-in-95 duration-200",
-        isClosing && "animate-dissolve-out"
-      )}
-      style={{
-        zIndex: window.zIndex,
-        top: window.position.y,
-        left: window.position.x,
-        width: window.size.width,
-        height: window.size.height,
+    <Draggable
+      nodeRef={nodeRef}
+      handle=".window-titlebar"
+      position={position}
+      onStop={onDragStop}
+      onMouseDown={handleFocus}
+      bounds={{
+        top: 0,
+        left: 0,
+        right: desktopBounds.width - width,
+        bottom: desktopBounds.height - height - TASKBAR_HEIGHT,
       }}
-      onMouseDown={() => focusWindow(window.id)}
+      disabled={windowState.isMaximized}
     >
-      <TitleBar title={window.title} icon={window.id} onClose={handleClose} />
-      <div className="flex-grow overflow-auto p-1 bg-black/30">
-        {window.content}
+      <div ref={nodeRef} className="absolute" style={{ zIndex: windowState.zIndex }}>
+        <ResizableBox
+          width={width}
+          height={height}
+          onResizeStop={onResizeStop}
+          minConstraints={[320, 200]}
+          maxConstraints={
+            !windowState.isMaximized ? [desktopBounds.width - 2, desktopBounds.height - TASKBAR_HEIGHT - 2] : undefined
+          }
+          resizeHandles={windowState.isMaximized ? [] : ['se']}
+          handle={<span className="react-resizable-handle-se" />}
+          axis={windowState.isMaximized ? 'none' : 'both'}
+          className={cn(
+            'flex flex-col',
+            'bg-window-bg border-2 border-border text-primary shadow-lg',
+            'animate-in fade-in-0 zoom-in-95 duration-200'
+          )}
+        >
+          <TitleBar
+            title={windowState.title}
+            icon={windowState.id}
+            onClose={() => closeWindow(windowState.id)}
+            onMaximize={() => toggleMaximize(windowState.id)}
+            onMinimize={() => toggleMinimize(windowState.id)}
+            isMaximized={windowState.isMaximized}
+          />
+          <div className="flex-grow overflow-auto p-1 bg-black/30 h-full">
+            {windowState.content}
+          </div>
+        </ResizableBox>
       </div>
-    </div>
+    </Draggable>
   );
 }

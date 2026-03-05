@@ -5,14 +5,33 @@ import { Github, Linkedin, Mail, FileText, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Clock from './Clock';
 import StartMenu from './StartMenu';
+import { useWindowStore } from '@/store/windowStore';
 import { getLucideIcon } from '@/lib/icons';
 
 const Taskbar = () => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const StartIcon = getLucideIcon('logo');
+  const { windows, focusWindow, toggleMinimize } = useWindowStore();
+
+  const handleTabClick = (id: string, isMinimized: boolean) => {
+      if (isMinimized) {
+        toggleMinimize(id); // This will also focus it.
+      } else {
+        const nonMinimizedWindows = windows.filter(w => !w.isMinimized);
+        const highestZIndex = Math.max(0, ...nonMinimizedWindows.map(w => w.zIndex));
+        const currentWindowZIndex = windows.find(w => w.id === id)?.zIndex ?? 0;
+        
+        // If it's not the top window, focus it. If it is, minimize it.
+        if (currentWindowZIndex < highestZIndex) {
+            focusWindow(id);
+        } else {
+            toggleMinimize(id);
+        }
+      }
+  }
 
   return (
-    <footer className="h-10 w-full bg-taskbar-bg border-t-2 border-border flex items-center justify-between px-2 z-50">
+    <footer className="h-10 w-full bg-taskbar-bg border-t-2 border-border flex items-center justify-between px-2 z-[200]">
       <div className="relative">
         <button
           onClick={() => setStartMenuOpen(prev => !prev)}
@@ -29,7 +48,28 @@ const Taskbar = () => {
         {startMenuOpen && <StartMenu onClose={() => setStartMenuOpen(false)} />}
       </div>
       
-      {/* Open window tabs would go here */}
+      <div className="flex-1 px-2 flex items-center gap-1 overflow-x-auto">
+        {windows.map(win => {
+            const Icon = getLucideIcon(win.id);
+            const nonMinimizedWindows = windows.filter(w => !w.isMinimized);
+            const highestZIndex = Math.max(0, ...nonMinimizedWindows.map(w => w.zIndex));
+            const isFocused = !win.isMinimized && win.zIndex === highestZIndex;
+            return (
+                <button
+                    key={win.id}
+                    onClick={() => handleTabClick(win.id, win.isMinimized)}
+                    className={cn(
+                        'h-7 px-2 flex items-center gap-1 max-w-36 text-xs border-2 truncate',
+                        isFocused ? 'bg-accent text-accent-foreground border-accent' : 
+                        win.isMinimized ? 'bg-muted/50 border-border opacity-70' : 'bg-secondary border-border hover:bg-accent/50'
+                    )}
+                >
+                    <Icon className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{win.title}</span>
+                </button>
+            )
+        })}
+      </div>
 
       <div className="flex items-center gap-3">
         <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Github size={16} /></a>

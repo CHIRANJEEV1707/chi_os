@@ -1,6 +1,5 @@
 'use client';
 
-import { WindowManagerProvider } from '@/context/WindowManagerContext';
 import Desktop from '@/components/desktop/Desktop';
 import Taskbar from '@/components/taskbar/Taskbar';
 import { WindowRenderer } from '@/components/window/WindowRenderer';
@@ -30,24 +29,22 @@ export default function ChiruOS() {
   }, [isIdle, renderScreensaver]);
 
   return (
-    <WindowManagerProvider>
-      <IconManagerProvider>
-        <main className="h-full w-full flex flex-col font-body">
-          <Desktop />
-          <WindowRenderer />
-          <Taskbar />
-          {renderScreensaver && (
-            <div
-              className={cn(
-                'fixed inset-0 z-[9998] animate-in fade-in-0 duration-500',
-                isExiting && 'animate-out fade-out-0 duration-500'
-              )}
-            >
-              <Screensaver />
-            </div>
-          )}
-        </main>
-      </IconManagerProvider>
-    </WindowManagerProvider>
+    <IconManagerProvider>
+      <main className="h-full w-full flex flex-col font-body">
+        <Desktop />
+        <WindowRenderer />
+        <Taskbar />
+        {renderScreensaver && (
+          <div
+            className={cn(
+              'fixed inset-0 z-[9998] animate-in fade-in-0 duration-500',
+              isExiting && 'animate-out fade-out-0 duration-500'
+            )}
+          >
+            <Screensaver />
+          </div>
+        )}
+      </main>
+    </IconManagerProvider>
   );
 }

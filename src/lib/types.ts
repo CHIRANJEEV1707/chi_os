@@ -7,6 +7,14 @@ export interface WindowState {
   zIndex: number;
   position: { x: number; y: number };
   size: { width: number | string; height: number | string };
+  isMinimized: boolean;
+  isMaximized: boolean;
+  preMaximizedState?: {
+    x: number;
+    y: number;
+    width: number | string;
+    height: number | string;
+  }
 }
 
 export interface IconState {

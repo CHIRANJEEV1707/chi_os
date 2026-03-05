@@ -2,13 +2,13 @@
 
 import Wallpaper from './Wallpaper';
 import Icon from './Icon';
-import { useWindowManager } from '@/hooks/useWindowManager';
+import { useWindowStore } from '@/store/windowStore';
 import { getPageComponent } from '../pages';
 import { useIconManager } from '@/hooks/useIconManager';
 import { useRef, useState, useEffect } from 'react';
 
 const Desktop = () => {
-  const { openWindow } = useWindowManager();
+  const { openWindow } = useWindowStore();
   const { icons } = useIconManager();
   const desktopRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState({ width: 0, height: 0 });

@@ -9,20 +9,29 @@ import {
     Settings,
     RefreshCw,
     Power,
-    Cat
+    Cat,
+    Copy
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
     folder: Folder,
+    projects: Folder,
     chip: Cpu,
+    skills: Cpu,
     briefcase: Briefcase,
+    experience: Briefcase,
     gamepad: Gamepad2,
+    games: Gamepad2,
     prompt: Terminal,
+    terminal: Terminal,
     user: User,
+    about: User,
     gear: Settings,
+    settings: Settings,
     refresh: RefreshCw,
     power: Power,
     logo: Cat, // Placeholder for CHIRU-OS logo
+    copy: Copy,
     default: Cat
   };
   

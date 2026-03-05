@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { START_MENU_ITEMS } from '@/lib/data';
 import { getLucideIcon } from '@/lib/icons';
-import { useWindowManager } from '@/hooks/useWindowManager';
+import { useWindowStore } from '@/store/windowStore';
 import { getPageComponent } from '../pages';
 
 type StartMenuProps = {
@@ -29,7 +29,7 @@ const StartMenuItem = ({ item, onClick }: { item: typeof START_MENU_ITEMS[0], on
 };
 
 export default function StartMenu({ onClose }: StartMenuProps) {
-  const { openWindow } = useWindowManager();
+  const { openWindow } = useWindowStore();
 
   const handleItemClick = (item: typeof START_MENU_ITEMS[0]) => {
     if (item.action === 'open_window') {
