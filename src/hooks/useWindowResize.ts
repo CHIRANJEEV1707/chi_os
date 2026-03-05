@@ -47,23 +47,23 @@ export const useWindowResize = (
     if (direction.includes('s')) newH = Math.max(minHeight, startH + dy);
 
     if (direction.includes('w')) {
-      const w = startW - dx;
-      if (w < minWidth) {
-        newW = minWidth;
-        newX = startLeft + startW - minWidth;
-      } else {
-        newW = w;
+      const newWidth = startW - dx;
+      if (newWidth >= minWidth) {
+        newW = newWidth;
         newX = startLeft + dx;
+      } else {
+        newW = minWidth;
+        newX = startLeft + (startW - minWidth);
       }
     }
     if (direction.includes('n')) {
-      const h = startH - dy;
-      if (h < minHeight) {
-        newH = minHeight;
-        newY = startTop + startH - minHeight;
-      } else {
-        newH = h;
+      const newHeight = startH - dy;
+      if (newHeight >= minHeight) {
+        newH = newHeight;
         newY = startTop + dy;
+      } else {
+        newH = minHeight;
+        newY = startTop + (startH - minHeight);
       }
     }
     
