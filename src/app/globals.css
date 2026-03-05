@@ -176,6 +176,31 @@
   display: inline-block;
 }
 
+@keyframes confetti-fall {
+  from {
+    transform: translateY(-10vh) rotateZ(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(110vh) rotateZ(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+
 @layer components {
     /* Print Modal Styles */
     .print-modal-overlay {
