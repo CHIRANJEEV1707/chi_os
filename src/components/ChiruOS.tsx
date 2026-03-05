@@ -9,10 +9,13 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { IconManagerProvider } from '@/context/IconManagerContext';
 
+export type WallpaperType = 'matrix' | 'grid' | 'plain';
+
 export default function ChiruOS() {
   const isIdle = useIdle(60000);
   const [renderScreensaver, setRenderScreensaver] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [wallpaper, setWallpaper] = useState<WallpaperType>('matrix');
 
   useEffect(() => {
     if (isIdle && !renderScreensaver) {
@@ -28,10 +31,18 @@ export default function ChiruOS() {
     }
   }, [isIdle, renderScreensaver]);
 
+  const cycleWallpaper = () => {
+    setWallpaper(current => {
+      if (current === 'matrix') return 'grid';
+      if (current === 'grid') return 'plain';
+      return 'matrix';
+    });
+  };
+
   return (
     <IconManagerProvider>
       <main className="h-full w-full flex flex-col font-body">
-        <Desktop />
+        <Desktop wallpaper={wallpaper} cycleWallpaper={cycleWallpaper} />
         <WindowRenderer />
         <Taskbar />
         {renderScreensaver && (

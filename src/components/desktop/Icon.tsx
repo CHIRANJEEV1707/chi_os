@@ -67,6 +67,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
           onBlur={handleBlur}
           className={cn(
             'flex flex-col items-center gap-1 p-2 w-24 h-24 text-center rounded-md focus:outline-none',
+            'animate-in fade-in-0 zoom-in-90 duration-300', // Entrance animation
             isDragging && 'opacity-70',
             selected ? 'bg-primary/30' : 'hover:bg-primary/10',
             // No focus ring when dragging, but apply when selected.

@@ -10,7 +10,8 @@ import {
     RefreshCw,
     Power,
     Cat,
-    Copy
+    Copy,
+    Info,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
@@ -32,6 +33,7 @@ import {
     power: Power,
     logo: Cat, // Placeholder for CHIRU-OS logo
     copy: Copy,
+    'about-os': Info,
     default: Cat
   };
   

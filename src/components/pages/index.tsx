@@ -9,6 +9,7 @@ import Games from './Games';
 import Terminal from './Terminal';
 import Trash from './Trash';
 import React from 'react';
+import AboutOS from './AboutOS';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -22,6 +23,7 @@ const pageMap: { [key: string]: React.ComponentType } = {
   games: Games,
   terminal: Terminal,
   trash: Trash,
+  'about-os': AboutOS,
 };
 
 export const getPageComponent = (id: string): React.ComponentType | null => {
