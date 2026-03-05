@@ -57,7 +57,6 @@ const FormField = ({ id, label, register, error, type = 'text', rows }: {
 // --- Main Component ---
 export default function Contact() {
   const [displayedLines, setDisplayedLines] = useState<string[]>([]);
-  const [isTyping, setIsTyping] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const hasAnimated = useRef(false);
 
@@ -69,58 +68,57 @@ export default function Contact() {
     resolver: zodResolver(contactSchema),
   });
 
+  const lines = [
+    "> INITIALIZING CONTACT PROTOCOL...",
+    "> ESTABLISHING SECURE CONNECTION...",
+    "> CONNECTION ESTABLISHED. READY FOR INPUT.",
+  ];
+
   useEffect(() => {
     if (hasAnimated.current) {
+        setDisplayedLines(lines);
+        setShowForm(true);
         return;
     }
-
-    const introLines = [
-      "INITIALIZING CONTACT PROTOCOL...",
-      "ESTABLISHING SECURE CONNECTION...",
-      "CONNECTION ESTABLISHED. READY FOR INPUT.",
-    ];
-
-    let lineIndex = 0;
-    let charIndex = 0;
+    
+    let currentLineIndex = 0;
+    let currentCharIndex = 0;
+    let currentLines: string[] = [];
     let timeoutId: NodeJS.Timeout;
-
-    const typeChar = () => {
-        if (lineIndex >= introLines.length) {
-            setIsTyping(false);
-            setTimeout(() => setShowForm(true), 300);
-            return;
-        }
-
-        const currentLine = introLines[lineIndex];
-
-        setDisplayedLines(prev => {
-            const newLines = [...prev];
-            if (newLines.length <= lineIndex) {
-              newLines.push('');
-            }
-            newLines[lineIndex] = `> ${currentLine.substring(0, charIndex + 1)}`;
-            return newLines;
-        });
-
-        charIndex++;
-
-        if (charIndex > currentLine.length) {
-            charIndex = 0;
-            lineIndex++;
-            timeoutId = setTimeout(typeChar, 200);
-        } else {
-            timeoutId = setTimeout(typeChar, 50);
-        }
-    };
-
-    typeChar();
-
-    return () => {
-        clearTimeout(timeoutId);
+  
+    const typeNextChar = () => {
+      if (currentLineIndex >= lines.length) {
+        setShowForm(true);
         hasAnimated.current = true;
+        return;
+      }
+  
+      const currentLine = lines[currentLineIndex];
+  
+      if (currentCharIndex === 0) {
+        currentLines = [...currentLines, ''];
+      }
+  
+      currentCharIndex++;
+      const updatedLines = currentLines.map((line, i) =>
+        i === currentLineIndex ? currentLine.slice(0, currentCharIndex) : line
+      );
+      currentLines = updatedLines;
+      setDisplayedLines([...updatedLines]);
+  
+      if (currentCharIndex >= currentLine.length) {
+        currentLineIndex++;
+        currentCharIndex = 0;
+        timeoutId = setTimeout(typeNextChar, 300);
+      } else {
+        timeoutId = setTimeout(typeNextChar, 50);
+      }
     };
-  }, []);
+  
+    timeoutId = setTimeout(typeNextChar, 300);
 
+    return () => clearTimeout(timeoutId);
+  }, []);
   
   const submissionSteps = [
     "Validating input fields... [OK]",
@@ -148,19 +146,13 @@ export default function Contact() {
     play('error');
   }
 
-  const introLines = [
-    "INITIALIZING CONTACT PROTOCOL...",
-    "ESTABLISHING SECURE CONNECTION...",
-    "CONNECTION ESTABLISHED. READY FOR INPUT.",
-  ];
-
   return (
     <div className="p-4 font-body h-full overflow-y-auto">
       <div className="font-headline text-[8px] md:text-[10px] text-primary h-24">
-        {displayedLines.map((line, index) => (
-          <p key={index}>
+        {displayedLines.map((line, i) => (
+          <p key={i}>
             {line}
-            {isTyping && index === displayedLines.length - 1 && line.length < introLines[index].length + 2 && (
+            {i === displayedLines.length - 1 && !showForm && (
                <span className="inline-block w-2 h-3 bg-primary animate-pulse ml-1 translate-y-px"></span>
             )}
           </p>
