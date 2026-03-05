@@ -72,16 +72,16 @@ export function ContextMenu({ x, y, onClose, onCycleWallpaper, onRefreshDesktop 
   return (
     <div
       ref={menuRef}
-      className="absolute w-48 bg-window-titlebar border-2 border-primary text-primary flex flex-col p-1 z-[1000] font-headline text-sm"
+      className="absolute w-44 bg-window-titlebar border-2 border-primary text-primary flex flex-col p-1 z-[1000] font-headline text-xs"
       style={{ top: y, left: x }}
     >
-      <button onClick={handleOpenTerminal} className="w-full text-left p-2 hover:bg-accent hover:text-accent-foreground">Open Terminal</button>
-      <button onClick={handleRefreshDesktop} className="w-full text-left p-2 hover:bg-accent hover:text-accent-foreground">Refresh Desktop</button>
+      <button onClick={handleOpenTerminal} className="w-full text-left px-2 py-1.5 hover:bg-accent hover:text-accent-foreground">Open Terminal</button>
+      <button onClick={handleRefreshDesktop} className="w-full text-left px-2 py-1.5 hover:bg-accent hover:text-accent-foreground">Refresh Desktop</button>
       <div className="h-px bg-border/50 my-1" />
-      <button onClick={handleAboutOS} className="w-full text-left p-2 hover:bg-accent hover:text-accent-foreground">About CHIRU-OS</button>
-      <button onClick={handleCycleWallpaper} className="w-full text-left p-2 hover:bg-accent hover:text-accent-foreground">Change Wallpaper</button>
+      <button onClick={handleAboutOS} className="w-full text-left px-2 py-1.5 hover:bg-accent hover:text-accent-foreground">About CHIRU-OS</button>
+      <button onClick={handleCycleWallpaper} className="w-full text-left px-2 py-1.5 hover:bg-accent hover:text-accent-foreground">Change Wallpaper</button>
       <div className="h-px bg-border/50 my-1" />
-      <button onClick={handleSecret} className="w-full text-left p-2 hover:bg-accent hover:text-accent-foreground">Secret...</button>
+      <button onClick={handleSecret} className="w-full text-left px-2 py-1.5 hover:bg-accent hover:text-accent-foreground">Secret...</button>
     </div>
   );
 }
