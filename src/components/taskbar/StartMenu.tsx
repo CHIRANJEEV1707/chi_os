@@ -5,6 +5,7 @@ import { START_MENU_ITEMS } from '@/lib/data';
 import { getLucideIcon } from '@/lib/icons';
 import { useWindowStore } from '@/store/windowStore';
 import { getPageComponent } from '../pages';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 type StartMenuProps = {
   onClose: () => void;
@@ -30,15 +31,19 @@ const StartMenuItem = ({ item, onClick }: { item: typeof START_MENU_ITEMS[0], on
 
 export default function StartMenu({ onClose }: StartMenuProps) {
   const { openWindow } = useWindowStore();
+  const { play } = useSoundEffect();
 
   const handleItemClick = (item: typeof START_MENU_ITEMS[0]) => {
     if (item.action === 'open_window') {
+      play('windowOpen');
       const PageComponent = getPageComponent(item.id);
       if (PageComponent) {
         openWindow(item.id, item.label, <PageComponent />);
       }
+    } else {
+      play('click');
+      // Other actions like reboot/shutdown can be handled here
     }
-    // Other actions like reboot/shutdown can be handled here
     onClose();
   };
 

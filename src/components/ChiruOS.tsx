@@ -8,6 +8,7 @@ import Screensaver from './screensaver/Screensaver';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { IconManagerProvider } from '@/context/IconManagerContext';
+import { initSoundSystem } from '@/lib/sounds';
 
 export type WallpaperType = 'matrix' | 'grid' | 'plain';
 
@@ -16,6 +17,11 @@ export default function ChiruOS() {
   const [renderScreensaver, setRenderScreensaver] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [wallpaper, setWallpaper] = useState<WallpaperType>('matrix');
+
+  useEffect(() => {
+    // Initialize sound system on the first user interaction
+    initSoundSystem();
+  }, []);
 
   useEffect(() => {
     if (isIdle && !renderScreensaver) {

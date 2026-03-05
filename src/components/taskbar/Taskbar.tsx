@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Github, Linkedin, Mail, FileText, Volume2, VolumeX } from 'lucide-react';
+import { Github, Linkedin, Mail, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Clock from './Clock';
 import StartMenu from './StartMenu';
@@ -10,16 +10,19 @@ import { getLucideIcon } from '@/lib/icons';
 import { useSoundStore } from '@/store/soundStore';
 import { getPageComponent } from '../pages';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 const Taskbar = () => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const StartIcon = getLucideIcon('logo');
   const { windows, focusWindow, toggleMinimize, openWindow } = useWindowStore();
   const { isSoundEnabled, toggleSound } = useSoundStore();
+  const { play } = useSoundEffect();
   const ContactPageComponent = getPageComponent('contact');
 
 
   const handleTabClick = (id: string, isMinimized: boolean) => {
+      play('click');
       if (isMinimized) {
         toggleMinimize(id); // This will also focus it.
       } else {
@@ -38,19 +41,29 @@ const Taskbar = () => {
   
   const handleContactClick = () => {
     if (ContactPageComponent) {
+      play('windowOpen');
       openWindow('contact', 'CONTACT.sh', <ContactPageComponent />);
     }
   }
 
   const handleResumeDownload = () => {
+    play('click');
     window.open('/resume/chiranjeev-agarwal-resume.pdf', '_blank');
+  }
+
+  const handleToggleSound = () => {
+    play('click');
+    toggleSound();
   }
 
   return (
     <footer className="h-10 w-full bg-taskbar-bg border-t-2 border-border flex items-center justify-between px-2 z-[200]">
       <div className="relative">
         <button
-          onClick={() => setStartMenuOpen(prev => !prev)}
+          onClick={() => {
+            play('click');
+            setStartMenuOpen(prev => !prev);
+          }}
           className={cn(
             'h-8 px-3 flex items-center gap-2 font-headline text-sm border-2',
             startMenuOpen
@@ -91,13 +104,13 @@ const Taskbar = () => {
         <div className="flex items-center gap-3">
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Github size={16} /></a>
+              <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Github size={16} /></a>
             </TooltipTrigger>
             <TooltipContent side="top"><p>GitHub</p></TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Linkedin size={16} /></a>
+              <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Linkedin size={16} /></a>
             </TooltipTrigger>
             <TooltipContent side="top"><p>LinkedIn</p></TooltipContent>
           </Tooltip>
@@ -119,8 +132,8 @@ const Taskbar = () => {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button onClick={toggleSound} className="text-primary hover:text-accent">
-                {isSoundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              <button onClick={handleToggleSound} className="text-primary hover:text-accent text-base" style={{fontFamily: 'monospace'}}>
+                {isSoundEnabled ? '🔊' : '🔇'}
               </button>
             </TooltipTrigger>
             <TooltipContent side="top"><p>Toggle Sound</p></TooltipContent>

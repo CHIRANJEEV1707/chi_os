@@ -5,6 +5,7 @@ import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { cn } from '@/lib/utils';
 import { IconState } from '@/lib/types';
 import { useIconManager } from '@/hooks/useIconManager';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 type IconProps = {
   icon: IconState;
@@ -21,9 +22,11 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const { updateIconPosition, focusIcon } = useIconManager();
   const nodeRef = useRef(null);
+  const { play } = useSoundEffect();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    play('click');
     setSelected(true);
     focusIcon(icon.id);
   };

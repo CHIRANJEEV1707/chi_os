@@ -8,6 +8,7 @@ import { useIconManager } from '@/hooks/useIconManager';
 import { useRef, useState, useEffect } from 'react';
 import { WallpaperType } from '../ChiruOS';
 import { ContextMenu } from './ContextMenu';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 type DesktopProps = {
     wallpaper: WallpaperType;
@@ -21,6 +22,7 @@ const Desktop = ({ wallpaper, cycleWallpaper }: DesktopProps) => {
   const [bounds, setBounds] = useState({ width: 0, height: 0 });
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [iconRenderKey, setIconRenderKey] = useState(0);
+  const { play } = useSoundEffect();
 
 
   useEffect(() => {
@@ -43,6 +45,7 @@ const Desktop = ({ wallpaper, cycleWallpaper }: DesktopProps) => {
   }, []);
 
   const handleIconDoubleClick = (id: string, label: string) => {
+    play('windowOpen');
     const PageComponent = getPageComponent(id);
     if (PageComponent) {
       openWindow(id, label, <PageComponent />);

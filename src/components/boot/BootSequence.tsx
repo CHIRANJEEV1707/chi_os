@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import POSTScreen from './POSTScreen';
 import ProgressBar from './ProgressBar';
 import OSLogo from './OSLogo';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 type BootSequenceProps = {
   onComplete: () => void;
@@ -13,8 +14,10 @@ type BootSequenceProps = {
 export default function BootSequence({ onComplete, onSkip }: BootSequenceProps) {
   const [phase, setPhase] = useState(1);
   const [showSkip, setShowSkip] = useState(false);
+  const { play } = useSoundEffect();
 
   useEffect(() => {
+    play('boot');
     const sequenceTimers: NodeJS.Timeout[] = [];
 
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -33,7 +36,7 @@ export default function BootSequence({ onComplete, onSkip }: BootSequenceProps) 
       sequenceTimers.forEach(clearTimeout);
       window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [onComplete, onSkip]);
+  }, [onComplete, onSkip, play]);
 
   return (
     <div className="bg-black text-primary font-headline h-full w-full flex items-center justify-center flex-col">

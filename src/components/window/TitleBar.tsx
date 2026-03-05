@@ -1,5 +1,6 @@
 import { X, Square, Minus, Copy } from 'lucide-react';
 import { getLucideIcon } from '@/lib/icons';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 type TitleBarProps = {
   title: string;
@@ -12,6 +13,23 @@ type TitleBarProps = {
 
 const TitleBar = ({ title, icon, onClose, onMinimize, onMaximize, isMaximized }: TitleBarProps) => {
     const Icon = getLucideIcon(icon);
+    const { play } = useSoundEffect();
+
+    const handleClose = () => {
+        play('windowClose');
+        onClose();
+    };
+
+    const handleMinimize = () => {
+        play('click');
+        onMinimize();
+    };
+
+    const handleMaximize = () => {
+        play('click');
+        onMaximize();
+    };
+
   return (
     <div className="window-titlebar h-7 bg-window-titlebar border-b-2 border-border flex items-center justify-between px-2 font-headline text-sm select-none cursor-move">
       <div className="flex items-center gap-2 truncate">
@@ -19,14 +37,14 @@ const TitleBar = ({ title, icon, onClose, onMinimize, onMaximize, isMaximized }:
         <span className="truncate">{title}</span>
       </div>
       <div className="flex items-center gap-1">
-        <button onClick={onMinimize} className="w-5 h-5 flex items-center justify-center border-2 border-border hover:bg-yellow-500/50">
+        <button onClick={handleMinimize} className="w-5 h-5 flex items-center justify-center border-2 border-border hover:bg-yellow-500/50">
           <Minus size={12} />
         </button>
-        <button onClick={onMaximize} className="w-5 h-5 flex items-center justify-center border-2 border-border hover:bg-green-500/50">
+        <button onClick={handleMaximize} className="w-5 h-5 flex items-center justify-center border-2 border-border hover:bg-green-500/50">
           {isMaximized ? <Copy size={10} /> : <Square size={10} />}
         </button>
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="w-5 h-5 flex items-center justify-center border-2 border-border hover:bg-red-500/50"
         >
           <X size={12} />

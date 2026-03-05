@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useWindowStore } from '@/store/windowStore';
 import { getPageComponent } from '../pages';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 type ContextMenuProps = {
   x: number;
@@ -16,6 +17,7 @@ type ContextMenuProps = {
 export function ContextMenu({ x, y, onClose, onCycleWallpaper, onRefreshDesktop }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { openWindow } = useWindowStore();
+  const { play } = useSoundEffect();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,6 +42,7 @@ export function ContextMenu({ x, y, onClose, onCycleWallpaper, onRefreshDesktop 
   const handleOpenTerminal = () => {
     const TerminalComponent = getPageComponent('terminal');
     if (TerminalComponent) {
+      play('windowOpen');
       openWindow('terminal', 'TERMINAL.exe', <TerminalComponent />);
     }
     onClose();
@@ -48,22 +51,26 @@ export function ContextMenu({ x, y, onClose, onCycleWallpaper, onRefreshDesktop 
   const handleAboutOS = () => {
     const AboutOSComponent = getPageComponent('about-os');
     if (AboutOSComponent) {
+      play('windowOpen');
       openWindow('about-os', 'About CHIRU-OS', <AboutOSComponent />);
     }
     onClose();
   };
   
   const handleCycleWallpaper = () => {
+    play('click');
     onCycleWallpaper();
     onClose();
   }
   
   const handleRefreshDesktop = () => {
+    play('click');
     onRefreshDesktop();
     onClose();
   }
 
   const handleSecret = () => {
+    play('click');
     console.log("🤫 You found a secret! More to come...");
     onClose();
   };
