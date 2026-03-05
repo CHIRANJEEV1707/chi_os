@@ -87,11 +87,26 @@ const Taskbar = () => {
         })}
       </div>
 
-      <div className="flex items-center gap-3">
-        <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Github size={16} /></a>
-        <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Linkedin size={16} /></a>
-        <button onClick={handleContactClick} className="text-primary hover:text-accent"><Mail size={16} /></button>
-        <TooltipProvider>
+      <TooltipProvider>
+        <div className="flex items-center gap-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Github size={16} /></a>
+            </TooltipTrigger>
+            <TooltipContent side="top"><p>GitHub</p></TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Linkedin size={16} /></a>
+            </TooltipTrigger>
+            <TooltipContent side="top"><p>LinkedIn</p></TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={handleContactClick} className="text-primary hover:text-accent"><Mail size={16} /></button>
+            </TooltipTrigger>
+            <TooltipContent side="top"><p>Contact Me</p></TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <button onClick={handleResumeDownload} className="text-primary hover:text-accent">
@@ -102,13 +117,18 @@ const Taskbar = () => {
               <p>Download Resume</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-        <button onClick={toggleSound} className="text-primary hover:text-accent">
-          {isSoundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-        </button>
-        <div className="w-px h-6 bg-border/50 mx-1" />
-        <Clock />
-      </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={toggleSound} className="text-primary hover:text-accent">
+                {isSoundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top"><p>Toggle Sound</p></TooltipContent>
+          </Tooltip>
+          <div className="w-px h-6 bg-border/50 mx-1" />
+          <Clock />
+        </div>
+      </TooltipProvider>
     </footer>
   );
 };
