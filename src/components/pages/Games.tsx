@@ -6,8 +6,9 @@ import Minesweeper from '@/components/games/Minesweeper';
 import Pong from '@/components/games/Pong';
 import Tetris from '@/components/games/Tetris';
 import Invaders from '@/components/games/Invaders';
+import Sudoku from '@/components/games/Sudoku';
 
-type Game = 'menu' | 'snake' | 'minesweeper' | 'pong' | 'tetris' | 'invaders';
+type Game = 'menu' | 'snake' | 'minesweeper' | 'pong' | 'tetris' | 'invaders' | 'sudoku';
 
 export default function Games() {
     const [activeGame, setActiveGame] = useState<Game>('menu');
@@ -24,6 +25,8 @@ export default function Games() {
                 return <Tetris />;
             case 'invaders':
                 return <Invaders />;
+            case 'sudoku':
+                return <Sudoku />;
             case 'menu':
             default:
                 return (
@@ -65,6 +68,13 @@ export default function Games() {
                             >
                                 <span className="text-2xl">👾</span>
                                 <span>INVADERS.exe</span>
+                            </button>
+                            <button
+                              onClick={() => setActiveGame('sudoku')}
+                              className="font-headline text-[10px] px-6 py-3 border-2 border-primary text-primary hover:bg-accent hover:text-accent-foreground flex flex-col items-center gap-2 w-40 h-28 justify-center"
+                            >
+                                <span className="text-2xl">🔢</span>
+                                <span>SUDOKU.exe</span>
                             </button>
                         </div>
                     </div>
