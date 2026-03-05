@@ -101,10 +101,10 @@ export default function About() {
       <div className="mt-4 p-2">
         <div className="h-px bg-primary/30 w-full" />
         <div className="flex justify-center items-center gap-6 mt-4">
-            <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
+            <a href="https://github.com/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
                 <Github size={20} />
             </a>
-            <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
+            <a href="https://linkedin.com/in/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
                 <Linkedin size={20} />
             </a>
             <a href="mailto:chiranjeev.agarwal@gmail.com" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">

@@ -21,7 +21,7 @@ const projectsData = [
     status: 'WIP',
     description: "Real-time chat application with pixel art UI. Supports rooms, direct messages, file sharing and custom pixel avatars.",
     stack: ['React', 'Node.js', 'Socket.io', 'MongoDB', 'Express'],
-    github: '#',
+    github: 'https://github.com/chiranjeev-agarwal',
     live: null,
   },
   {
@@ -30,7 +30,7 @@ const projectsData = [
     status: 'ARCHIVED',
     description: "AI-powered coding challenge platform that generates personalized problems based on skill level using GPT-4 API.",
     stack: ['Python', 'FastAPI', 'OpenAI', 'PostgreSQL', 'React'],
-    github: '#',
+    github: 'https://github.com/chiranjeev-agarwal',
     live: null,
   },
   {
@@ -39,7 +39,7 @@ const projectsData = [
     status: 'LIVE',
     description: "Contributed to various open-source projects, focusing on documentation, bug fixes, and feature enhancements.",
     stack: ['Git', 'Markdown', 'Various'],
-    github: '#',
+    github: 'https://github.com/chiranjeev-agarwal',
     live: null,
   }
 ];

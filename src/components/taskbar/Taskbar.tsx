@@ -104,13 +104,13 @@ const Taskbar = () => {
         <div className="flex items-center gap-3">
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Github size={16} /></a>
+              <a href="https://github.com/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Github size={16} /></a>
             </TooltipTrigger>
             <TooltipContent side="top"><p>GitHub</p></TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Linkedin size={16} /></a>
+              <a href="https://linkedin.com/in/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Linkedin size={16} /></a>
             </TooltipTrigger>
             <TooltipContent side="top"><p>LinkedIn</p></TooltipContent>
           </Tooltip>

@@ -1,3 +1,186 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { cn } from '@/lib/utils';
+import { Github, Linkedin, Mail } from 'lucide-react';
+import { useSoundEffect } from '@/hooks/useSoundEffect';
+
+// --- Schema ---
+const contactSchema = z.object({
+  name: z.string().min(1, { message: 'name cannot be empty' }),
+  email: z.string().email({ message: 'invalid email address' }),
+  subject: z.string().min(1, { message: 'subject cannot be empty' }),
+  message: z.string().min(1, { message: 'message cannot be empty' }),
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
+
+// --- Helper Components ---
+const TypingLine = ({ text, onFinished, delay = 0, speed = 50 }: { text: string; onFinished: () => void; delay?: number, speed?: number }) => {
+  const [displayedText, setDisplayedText] = useState('');
+
+  useEffect(() => {
+    const startTimeout = setTimeout(() => {
+      let i = 0;
+      const interval = setInterval(() => {
+        setDisplayedText(text.substring(0, i + 1));
+        i++;
+        if (i > text.length) {
+          clearInterval(interval);
+          onFinished();
+        }
+      }, speed);
+      return () => clearInterval(interval);
+    }, delay);
+
+    return () => clearTimeout(startTimeout);
+  }, [text, onFinished, delay, speed]);
+
+  return (
+    <p>
+      &gt; {displayedText}
+      <span className={cn(displayedText.length === text.length ? 'hidden' : 'inline-block w-2 h-4 bg-primary animate-pulse ml-1 translate-y-0.5')}></span>
+    </p>
+  );
+};
+
+const FormField = ({ id, label, register, error, type = 'text', rows }: {
+    id: keyof ContactFormData;
+    label: string;
+    register: any;
+    error?: string;
+    type?: string;
+    rows?: number;
+}) => (
+  <div className="flex flex-col gap-1">
+    <div className="flex items-center gap-2">
+      <label htmlFor={id} className="flex-shrink-0 font-body text-base md:text-lg whitespace-nowrap">
+        <span className="text-green-400">chiruos@portfolio:~$</span>
+        <span className="text-primary ml-1">{label}:</span>
+      </label>
+      {type === 'textarea' ? (
+        <textarea
+          id={id}
+          rows={rows}
+          {...register(id)}
+          className="w-full bg-transparent border-b border-primary/50 focus:border-primary font-body text-base md:text-lg text-primary outline-none resize-none caret-primary"
+        />
+      ) : (
+        <input
+          id={id}
+          type={type}
+          {...register(id)}
+          className="w-full bg-transparent border-b border-primary/50 focus:border-primary font-body text-base md:text-lg text-primary outline-none caret-primary"
+        />
+      )}
+    </div>
+    {error && <p className="font-body text-destructive text-sm">&gt; ERROR: {error}</p>}
+  </div>
+);
+
+
+// --- Main Component ---
 export default function Contact() {
-    return <div className="p-4 font-body"><h1 className="font-headline text-lg">CONTACT.sh</h1><p className="mt-2">Content for contact page...</p></div>;
+  const [headerLine, setHeaderLine] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [submissionLog, setSubmissionLog] = useState<string[]>([]);
+  const { play } = useSoundEffect();
+
+  const { register, handleSubmit, formState: { errors } } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+  });
+
+  const headerLines = [
+    "INITIALIZING CONTACT PROTOCOL...",
+    "ESTABLISHING SECURE CONNECTION...",
+    "CONNECTION ESTABLISHED. READY FOR INPUT.",
+  ];
+
+  const submissionSteps = [
+    "Validating input fields... [OK]",
+    "Encrypting message payload... [OK]",
+    "Establishing connection to chiranjeev@email.com... [OK]",
+    "Transmitting message... [OK]",
+    "TRANSMISSION COMPLETE. Chiranjeev will respond shortly!",
+  ];
+  
+  const onSubmit = (data: ContactFormData) => {
+    play('success');
+    setStatus('submitting');
+    let logIndex = 0;
+    const interval = setInterval(() => {
+      setSubmissionLog(prev => [...prev, submissionSteps[logIndex]]);
+      logIndex++;
+      if (logIndex === submissionSteps.length) {
+        clearInterval(interval);
+        setStatus('success');
+      }
+    }, 600);
+  };
+  
+  const handleFormError = () => {
+    play('error');
+  }
+
+  return (
+    <div className="p-4 font-body h-full overflow-y-auto">
+      <div className="font-headline text-[8px] md:text-[10px] text-primary h-24">
+        {headerLines.map((line, index) =>
+          index <= headerLine ? (
+            <TypingLine
+              key={index}
+              text={line}
+              onFinished={() => setHeaderLine(i => i + 1)}
+            />
+          ) : null
+        )}
+      </div>
+
+      {status !== 'success' && status !== 'submitting' && headerLine > 2 && (
+        <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="flex flex-col gap-4 animate-in fade-in-0 duration-500">
+          <FormField id="name" label="enter_name" register={register} error={errors.name?.message} />
+          <FormField id="email" label="enter_email" register={register} error={errors.email?.message} type="email" />
+          <FormField id="subject" label="enter_subject" register={register} error={errors.subject?.message} />
+          <FormField id="message" label="enter_message" register={register} error={errors.message?.message} type="textarea" rows={4} />
+
+          <button
+            type="submit"
+            onClick={() => play('click')}
+            className="w-full font-headline text-[8px] mt-4 p-2 border-2 border-primary bg-black/30 text-primary hover:bg-accent hover:text-accent-foreground"
+          >
+            [ EXECUTE SEND.sh ]
+          </button>
+        </form>
+      )}
+      
+      {(status === 'submitting' || status === 'success') && (
+        <div className="font-body text-base text-primary/90 flex flex-col gap-1">
+            {submissionLog.map((log, i) => (
+                <p key={i}>&gt; {log}</p>
+            ))}
+        </div>
+      )}
+
+
+      <div className="mt-12">
+        <div className="h-px bg-primary/30 w-full" />
+        <div className="font-body text-center mt-4 text-primary text-sm">&gt; OR REACH ME DIRECTLY:</div>
+        <div className="flex justify-center items-center gap-6 mt-4">
+            <a href="https://github.com/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
+                <Github size={20} />
+            </a>
+            <a href="https://linkedin.com/in/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
+                <Linkedin size={20} />
+            </a>
+            <a href="mailto:chiranjeev.agarwal@gmail.com" className="text-primary hover:text-accent p-2 border-2 border-transparent hover:border-accent">
+                <Mail size={20} />
+            </a>
+        </div>
+      </div>
+
+    </div>
+  );
 }
