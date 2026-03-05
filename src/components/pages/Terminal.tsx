@@ -111,6 +111,7 @@ export default function Terminal() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [showMatrix, setShowMatrix] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
+    const [confettiKey, setConfettiKey] = useState(0);
 
     const history = useRef<string[]>([]);
     const historyIndex = useRef<number>(0);
@@ -271,17 +272,18 @@ export default function Terminal() {
                     { text: "> Initiating hire sequence...", delay: 600 },
                     { text: "> Updating your career trajectory... [OK]", delay: 1200 },
                     { text: "> Best decision you'll make today!", delay: 1800 },
-                  ]
+                  ];
                 
-                  for (const line of lines) {
-                    await new Promise(resolve => setTimeout(() => {
+                await Promise.all(lines.map(line => 
+                    new Promise(resolve => setTimeout(() => {
                         addOutput(line.text);
                         resolve(true);
                     }, line.delay))
-                  }
+                ));
 
                 await new Promise(r => setTimeout(r, 600));
                 setShowConfetti(true);
+                setConfettiKey(prev => prev + 1);
 
                 await new Promise(r => setTimeout(r, 1000));
                 const ContactComponent = getPageComponent('contact');
@@ -376,7 +378,7 @@ export default function Terminal() {
                 />
             </div>
             {showMatrix && <MatrixEffect onClose={() => setShowMatrix(false)} />}
-            {showConfetti && <ConfettiEffect onComplete={() => setShowConfetti(false)} />}
+            {showConfetti && <ConfettiEffect key={confettiKey} onComplete={() => setShowConfetti(false)} />}
         </div>
     );
 }

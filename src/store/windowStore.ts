@@ -2,13 +2,14 @@
 
 import { create } from 'zustand';
 import { WindowState } from '@/lib/types';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 const BASE_Z_INDEX = 100;
 const TASKBAR_HEIGHT = 40;
 
 interface WindowStore {
   windows: WindowState[];
+  contactOpenKey: number;
   openWindow: (id: string, title: string, content: ReactNode) => void;
   closeWindow: (id: string) => void;
   focusWindow: (id: string) => void;
@@ -21,40 +22,46 @@ interface WindowStore {
 
 export const useWindowStore = create<WindowStore>((set, get) => ({
   windows: [],
+  contactOpenKey: 0,
   openWindow: (id, title, content) => {
     set(state => {
+      let newContactOpenKey = state.contactOpenKey;
+      let finalContent = content;
+
+      if (id === 'contact') {
+        newContactOpenKey++;
+        if (React.isValidElement(content)) {
+            finalContent = React.cloneElement(content, { key: newContactOpenKey });
+        }
+      }
+
       const existingWindow = state.windows.find(w => w.id === id);
       const highestZIndex = Math.max(BASE_Z_INDEX, ...state.windows.map(w => w.zIndex));
       
       if (existingWindow) {
-        // If it's minimized, unminimize it and focus
-        if (existingWindow.isMinimized) {
-            return {
-              windows: state.windows.map(w =>
-                w.id === id ? { ...w, isMinimized: false, zIndex: highestZIndex + 1 } : w
-              )
-            };
-        }
-        // If it's not minimized, just focus it
         return {
+          contactOpenKey: newContactOpenKey,
           windows: state.windows.map(w =>
-            w.id === id ? { ...w, zIndex: highestZIndex + 1 } : w
+            w.id === id ? { ...w, content: finalContent, isMinimized: false, zIndex: highestZIndex + 1 } : w
           )
         };
       }
 
-      // If window doesn't exist, create and focus
       const newWindow: WindowState = {
         id,
         title,
-        content,
+        content: finalContent,
         zIndex: highestZIndex + 1,
         position: { x: 150 + state.windows.length * 20, y: 100 + state.windows.length * 20 },
         size: { width: 640, height: 420 },
         isMinimized: false,
         isMaximized: false,
       };
-      return { windows: [...state.windows, newWindow] };
+      
+      return { 
+          windows: [...state.windows, newWindow],
+          contactOpenKey: newContactOpenKey
+      };
     });
   },
   closeWindow: (id) => set(state => ({ windows: state.windows.filter(w => w.id !== id) })),
@@ -80,7 +87,6 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         const win = state.windows.find(w => w.id === id);
         if (!win) return state;
 
-        // if un-minimizing, focus it
         if(win.isMinimized) {
             const highestZIndex = Math.max(BASE_Z_INDEX, ...state.windows.map(w => w.zIndex));
             return {
@@ -89,7 +95,6 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
                 )
             };
         } else {
-            // just minimize, potentially from maximized state
             return {
                 windows: state.windows.map(w =>
                     w.id === id ? { ...w, isMinimized: true } : w
@@ -105,7 +110,6 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         const highestZIndex = Math.max(BASE_Z_INDEX, ...state.windows.map(w => w.zIndex));
 
         if (windowToMaximize.isMaximized) {
-            // Restore
             return {
                 windows: state.windows.map(w =>
                     w.id === id ? {
@@ -118,7 +122,6 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
                 )
             };
         } else {
-            // Maximize
             return {
                 windows: state.windows.map(w =>
                     w.id === id ? {
