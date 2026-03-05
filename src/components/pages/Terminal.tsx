@@ -175,11 +175,11 @@ export default function Terminal() {
             const section = args[0];
             if (!section) return addError("> ERROR: 'open' requires a section. Type 'ls' to see options.");
             if (sections.includes(section)) {
-                const Component = getPageComponent(section);
+                const PageComponent = getPageComponent(section);
                 const app = DESKTOP_ICONS.find(i => i.id === section);
-                if (Component && app) {
+                if (PageComponent && app) {
                     addOutput(`> Opening ${section}...`);
-                    openWindow(app.id, app.label, <Component />);
+                    openWindow(app.id, app.label, <PageComponent />);
                 } else {
                     addError(`> ERROR: Could not find application '${section}'.`);
                 }
@@ -266,30 +266,33 @@ export default function Terminal() {
         'hire': async (args) => {
             if (args[0] === 'me') {
                 play('success');
-
+                
                 const lines = [
                     { text: "> EXCELLENT CHOICE DETECTED!", delay: 0 },
                     { text: "> Initiating hire sequence...", delay: 600 },
                     { text: "> Updating your career trajectory... [OK]", delay: 1200 },
                     { text: "> Best decision you'll make today!", delay: 1800 },
-                  ];
-                
-                await Promise.all(lines.map(line => 
-                    new Promise(resolve => setTimeout(() => {
+                ];
+
+                for (const line of lines) {
+                    await new Promise(resolve => setTimeout(() => {
                         addOutput(line.text);
                         resolve(true);
-                    }, line.delay))
-                ));
+                    }, line.delay));
+                }
 
                 await new Promise(r => setTimeout(r, 600));
+
                 setShowConfetti(true);
                 setConfettiKey(prev => prev + 1);
 
                 await new Promise(r => setTimeout(r, 1000));
+                
                 const ContactComponent = getPageComponent('contact');
                 if (ContactComponent) {
                     openWindow('contact', 'CONTACT.sh', <ContactComponent />);
                 }
+
             } else {
                 addError(`> Command not found: 'hire ${args[0]}'. Did you mean 'hire me'?`);
             }
