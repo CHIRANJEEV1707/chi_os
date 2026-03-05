@@ -174,11 +174,11 @@ export default function Terminal() {
             const section = args[0];
             if (!section) return addError("> ERROR: 'open' requires a section. Type 'ls' to see options.");
             if (sections.includes(section)) {
-                const component = getPageComponent(section);
+                const Component = getPageComponent(section);
                 const app = DESKTOP_ICONS.find(i => i.id === section);
-                if (component && app) {
+                if (Component && app) {
                     addOutput(`> Opening ${section}...`);
-                    openWindow(app.id, app.label, <component />);
+                    openWindow(app.id, app.label, <Component />);
                 } else {
                     addError(`> ERROR: Could not find application '${section}'.`);
                 }
@@ -228,8 +228,10 @@ export default function Terminal() {
             if (!game) return addError(`> ERROR: 'play' requires a game. Available: ${games.join(', ')}`);
             if (games.includes(game)) {
                 addOutput(`> Launching ${game}...`);
-                const gamesComponent = getPageComponent('games');
-                openWindow('games', 'GAMES/', <gamesComponent />);
+                const GamesComponent = getPageComponent('games');
+                if (GamesComponent) {
+                    openWindow('games', 'GAMES/', <GamesComponent />);
+                }
             } else {
                 addError(`> ERROR: Game '${game}' not found. Available: ${games.join(', ')}`);
             }
@@ -264,24 +266,27 @@ export default function Terminal() {
             if (args[0] === 'me') {
                 play('success');
 
-                addOutput("> EXCELLENT CHOICE DETECTED!");
+                const lines = [
+                    { text: "> EXCELLENT CHOICE DETECTED!", delay: 0 },
+                    { text: "> Initiating hire sequence...", delay: 600 },
+                    { text: "> Updating your career trajectory... [OK]", delay: 1200 },
+                    { text: "> Best decision you'll make today!", delay: 1800 },
+                  ]
                 
-                await new Promise(r => setTimeout(r, 600));
-                addOutput("> Initiating hire sequence...");
-
-                await new Promise(r => setTimeout(r, 600));
-                addOutput("> Updating your career trajectory... [OK]");
-
-                await new Promise(r => setTimeout(r, 600));
-                addOutput("> Best decision you'll make today!");
+                  for (const line of lines) {
+                    await new Promise(resolve => setTimeout(() => {
+                        addOutput(line.text);
+                        resolve(true);
+                    }, line.delay))
+                  }
 
                 await new Promise(r => setTimeout(r, 600));
                 setShowConfetti(true);
 
                 await new Promise(r => setTimeout(r, 1000));
-                const contactComponent = getPageComponent('contact');
-                if (contactComponent) {
-                    openWindow('contact', 'CONTACT.sh', <contactComponent />);
+                const ContactComponent = getPageComponent('contact');
+                if (ContactComponent) {
+                    openWindow('contact', 'CONTACT.sh', <ContactComponent />);
                 }
             } else {
                 addError(`> Command not found: 'hire ${args[0]}'. Did you mean 'hire me'?`);
