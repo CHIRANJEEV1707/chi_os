@@ -59,6 +59,18 @@ const createEmptyGrid = (width: number, height: number): Grid =>
   );
 
 const gameReducer = (state: State, action: Action): State => {
+  if (action.type === 'RESTART') {
+    const { width, height, mines } = DIFFICULTIES[action.difficulty];
+    return {
+      grid: createEmptyGrid(width, height),
+      status: 'IDLE',
+      mines,
+      flags: 0,
+      revealedCells: 0,
+      isFirstClick: true,
+    };
+  }
+
   const { grid, isFirstClick, mines, flags, revealedCells } = state;
   const { height, width } = { height: grid.length, width: grid[0]?.length || 0 };
   const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
@@ -78,18 +90,6 @@ const gameReducer = (state: State, action: Action): State => {
     return neighbors;
   };
   
-  if (action.type === 'RESTART') {
-    const { width, height, mines } = DIFFICULTIES[action.difficulty];
-    return {
-      grid: createEmptyGrid(width, height),
-      status: 'IDLE',
-      mines,
-      flags: 0,
-      revealedCells: 0,
-      isFirstClick: true,
-    };
-  }
-
   // --- First Click Mine Generation ---
   if (isFirstClick && action.type !== 'TOGGLE_FLAG') {
     const { x: firstX, y: firstY } = action.type === 'REVEAL_CELL' ? action : {x:0, y:0};
