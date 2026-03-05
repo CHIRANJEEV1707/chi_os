@@ -1,10 +1,11 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import TitleBar from './TitleBar';
 import { WindowState } from '@/lib/types';
 import { useWindowStore } from '@/store/windowStore';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
+import { useWindowResize } from '@/hooks/useWindowResize';
 
 type WindowProps = {
   windowState: WindowState;
@@ -12,25 +13,18 @@ type WindowProps = {
 };
 
 const TASKBAR_HEIGHT = 40;
-const MIN_WIDTH = 320;
-const MIN_HEIGHT = 200;
-const RESIZE_HANDLES = ['top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
+const handles = ['n','s','w','e','nw','ne','sw','se'];
+const handleClassMap: {[key: string]: string} = {
+    n: 'resize-handle resize-handle-n',
+    s: 'resize-handle resize-handle-s',
+    w: 'resize-handle resize-handle-w',
+    e: 'resize-handle resize-handle-e',
+    nw: 'resize-handle resize-handle-nw',
+    ne: 'resize-handle resize-handle-ne',
+    sw: 'resize-handle resize-handle-sw',
+    se: 'resize-handle resize-handle-se',
+}
 
-const getCursorForDirection = (direction: string) => {
-  if (direction.includes('top') || direction.includes('bottom')) {
-    if (direction.includes('left') || direction.includes('right')) {
-      if ((direction.includes('top') && direction.includes('left')) || (direction.includes('bottom') && direction.includes('right'))) {
-        return 'nwse-resize';
-      }
-      return 'nesw-resize';
-    }
-    return 'ns-resize';
-  }
-  if (direction.includes('left') || direction.includes('right')) {
-    return 'ew-resize';
-  }
-  return 'auto';
-};
 
 export default function Window({ windowState, desktopBounds }: WindowProps) {
   const {
@@ -39,98 +33,17 @@ export default function Window({ windowState, desktopBounds }: WindowProps) {
     toggleMinimize,
     toggleMaximize,
     updateWindowPosition,
-    updateWindowSize,
   } = useWindowStore();
   const nodeRef = useRef(null);
-  const [isResizing, setIsResizing] = useState(false);
+  const windowWrapperRef = useRef<HTMLDivElement>(null);
 
-  const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>, direction: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    setIsResizing(true);
-    const bodyCursor = getCursorForDirection(direction);
-    document.body.style.cursor = bodyCursor;
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const { position: { x: startLeft, y: startTop }, size: { width: startWidth, height: startHeight } } = useWindowStore.getState().windows.find(w => w.id === windowState.id)!;
-    
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-        const dx = moveEvent.clientX - startX;
-        const dy = moveEvent.clientY - startY;
-        let newWidth = startWidth as number;
-        let newHeight = startHeight as number;
-        let newX = startLeft;
-        let newY = startTop;
-
-        if (direction.includes('right')) newWidth = Math.max(MIN_WIDTH, (startWidth as number) + dx);
-        if (direction.includes('bottom')) newHeight = Math.max(MIN_HEIGHT, (startHeight as number) + dy);
-
-        if (direction.includes('left')) {
-            const w = (startWidth as number) - dx;
-            if (w < MIN_WIDTH) {
-                newWidth = MIN_WIDTH;
-                newX = startLeft + (startWidth as number) - MIN_WIDTH;
-            } else {
-                newWidth = w;
-                newX = startLeft + dx;
-            }
-        }
-        if (direction.includes('top')) {
-            const h = (startHeight as number) - dy;
-            if (h < MIN_HEIGHT) {
-                newHeight = MIN_HEIGHT;
-                newY = startTop + (startHeight as number) - MIN_HEIGHT;
-            } else {
-                newHeight = h;
-                newY = startTop + dy;
-            }
-        }
-
-        // Max constraints
-        if (newX < 0) { newWidth += newX; newX = 0; }
-        if (newY < 0) { newHeight += newY; newY = 0; }
-        if (newX + newWidth > desktopBounds.width) { newWidth = desktopBounds.width - newX; }
-        if (newY + newHeight > desktopBounds.height - TASKBAR_HEIGHT) { newHeight = desktopBounds.height - TASKBAR_HEIGHT - newY; }
-
-        updateWindowSize(windowState.id, { width: newWidth, height: newHeight });
-        updateWindowPosition(windowState.id, { x: newX, y: newY });
-    };
-
-    const handleMouseUp = () => {
-        setIsResizing(false);
-        document.body.style.cursor = '';
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-
-        const currentWindow = useWindowStore.getState().windows.find(w => w.id === windowState.id);
-        if (currentWindow) {
-            const snappedWidth = Math.round((currentWindow.size.width as number) / 4) * 4;
-            const snappedHeight = Math.round((currentWindow.size.height as number) / 4) * 4;
-            let snappedX = currentWindow.position.x;
-            let snappedY = currentWindow.position.y;
-            if (direction.includes('left')) {
-                snappedX = currentWindow.position.x + ((currentWindow.size.width as number) - snappedWidth);
-            }
-            if (direction.includes('top')) {
-                snappedY = currentWindow.position.y + ((currentWindow.size.height as number) - snappedHeight);
-            }
-            updateWindowSize(windowState.id, { width: snappedWidth, height: snappedHeight });
-            updateWindowPosition(windowState.id, { x: snappedX, y: snappedY });
-        }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
+  const { onResizeStart, isResizing } = useWindowResize(windowState.id, windowWrapperRef, desktopBounds);
 
   if (windowState.isMinimized) {
     return null;
   }
 
   const handleFocus = (e: React.MouseEvent) => {
-    // Prevent focus when clicking on buttons in title bar or resize handles
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('.resize-handle')) {
       return;
     }
@@ -173,19 +86,20 @@ export default function Window({ windowState, desktopBounds }: WindowProps) {
     >
       <div ref={nodeRef} className="absolute" style={{ zIndex: windowState.zIndex }} onMouseDown={handleFocus}>
         <div
+          ref={windowWrapperRef}
           style={{ width, height }}
           className={cn(
-            'flex flex-col',
+            'flex flex-col overflow-visible',
             'bg-window-bg border-2 border-border text-primary shadow-lg',
             'animate-in fade-in-0 zoom-in-95 duration-200',
             isResizing && 'window-resizing'
           )}
         >
-           {!windowState.isMaximized && RESIZE_HANDLES.map(dir => (
+           {!windowState.isMaximized && handles.map(dir => (
             <div
               key={dir}
-              className={`resize-handle resize-handle-${dir}`}
-              onMouseDown={(e) => handleResizeMouseDown(e, dir)}
+              className={handleClassMap[dir]}
+              onMouseDown={(e) => onResizeStart(e, dir)}
             />
           ))}
           <TitleBar
