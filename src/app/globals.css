@@ -171,4 +171,102 @@
 
 .type-in {
   animation: type-in 1s steps(40, end);
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+@layer components {
+    /* Print Modal Styles */
+    .print-modal-overlay {
+        backdrop-filter: blur(4px);
+    }
+    
+    .printable-card-wrapper {
+        transform: scale(0.6) translateY(-5%);
+        transition: transform 0.5s ease-in-out;
+    }
+    
+    .printable-card-container.opacity-100 .printable-card-wrapper {
+        transform: scale(0.6) translateY(0);
+    }
+    
+    .printable-card-grid {
+        display: grid;
+        grid-template-areas:
+            ". panel-1 ."
+            "panel-2 panel-3 panel-4"
+            ". panel-5 ."
+            ". panel-6 .";
+        grid-template-columns: 200px 200px 200px;
+        grid-template-rows: 200px 200px 200px 200px;
+        gap: 4px;
+        color: hsl(var(--primary));
+        font-family: var(--font-body);
+    }
+
+    .card-panel {
+        border: 1px dashed hsl(var(--primary));
+        background-color: hsl(var(--background));
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .panel-1 { grid-area: panel-1; }
+    .panel-2 { grid-area: panel-2; }
+    .panel-3 { grid-area: panel-3; }
+    .panel-4 { grid-area: panel-4; }
+    .panel-5 { grid-area: panel-5; }
+    .panel-6 { grid-area: panel-6; }
+    
+    /* Print-specific Styles */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .printable-card-container, .printable-card-container * {
+            visibility: visible;
+        }
+
+        .print-modal-controls {
+            display: none;
+        }
+        
+        .printable-card-container {
+            position: absolute !important;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none !important;
+        }
+        
+        .printable-card-wrapper {
+            transform: scale(1);
+        }
+        
+        .card-panel {
+            border: 1px solid #333 !important;
+            background-color: #fff !important;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    
+        .card-panel h3, .card-panel p, .card-panel li, .card-panel span, .card-panel div {
+            color: #000 !important;
+            border-color: #000 !important;
+        }
+    }
 }
