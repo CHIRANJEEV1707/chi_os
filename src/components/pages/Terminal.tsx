@@ -263,13 +263,26 @@ export default function Terminal() {
         'hire': async (args) => {
             if (args[0] === 'me') {
                 play('success');
-                await new Promise(r => setTimeout(r, 400)); addOutput("> EXCELLENT CHOICE DETECTED!");
-                await new Promise(r => setTimeout(r, 400)); addOutput("> Initiating hire sequence...");
+
+                addOutput("> EXCELLENT CHOICE DETECTED!");
+                
+                await new Promise(r => setTimeout(r, 600));
+                addOutput("> Initiating hire sequence...");
+
+                await new Promise(r => setTimeout(r, 600));
+                addOutput("> Updating your career trajectory... [OK]");
+
+                await new Promise(r => setTimeout(r, 600));
+                addOutput("> Best decision you'll make today!");
+
+                await new Promise(r => setTimeout(r, 600));
                 setShowConfetti(true);
-                await new Promise(r => setTimeout(r, 400)); addOutput("> Updating your career trajectory... [OK]");
-                await new Promise(r => setTimeout(r, 400)); addOutput("> Best decision you'll make today!");
+
+                await new Promise(r => setTimeout(r, 1000));
                 const contactComponent = getPageComponent('contact');
-                openWindow('contact', 'CONTACT.sh', <contactComponent />);
+                if (contactComponent) {
+                    openWindow('contact', 'CONTACT.sh', <contactComponent />);
+                }
             } else {
                 addError(`> Command not found: 'hire ${args[0]}'. Did you mean 'hire me'?`);
             }
