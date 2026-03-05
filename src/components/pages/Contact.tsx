@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,34 +19,6 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 // --- Helper Components ---
-const TypingLine = ({ text, onFinished, delay = 0, speed = 50 }: { text: string; onFinished: () => void; delay?: number, speed?: number }) => {
-  const [displayedText, setDisplayedText] = useState('');
-
-  useEffect(() => {
-    const startTimeout = setTimeout(() => {
-      let i = 0;
-      const interval = setInterval(() => {
-        setDisplayedText(text.substring(0, i + 1));
-        i++;
-        if (i > text.length) {
-          clearInterval(interval);
-          onFinished();
-        }
-      }, speed);
-      return () => clearInterval(interval);
-    }, delay);
-
-    return () => clearTimeout(startTimeout);
-  }, [text, onFinished, delay, speed]);
-
-  return (
-    <p>
-      &gt; {displayedText}
-      <span className={cn(displayedText.length === text.length ? 'hidden' : 'inline-block w-2 h-4 bg-primary animate-pulse ml-1 translate-y-0.5')}></span>
-    </p>
-  );
-};
-
 const FormField = ({ id, label, register, error, type = 'text', rows }: {
     id: keyof ContactFormData;
     label: string;
@@ -84,7 +56,11 @@ const FormField = ({ id, label, register, error, type = 'text', rows }: {
 
 // --- Main Component ---
 export default function Contact() {
-  const [headerLine, setHeaderLine] = useState(0);
+  const [displayedLines, setDisplayedLines] = useState<string[]>([]);
+  const [isTyping, setIsTyping] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const hasAnimated = useRef(false);
+
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const [submissionLog, setSubmissionLog] = useState<string[]>([]);
   const { play } = useSoundEffect();
@@ -93,12 +69,59 @@ export default function Contact() {
     resolver: zodResolver(contactSchema),
   });
 
-  const headerLines = [
-    "INITIALIZING CONTACT PROTOCOL...",
-    "ESTABLISHING SECURE CONNECTION...",
-    "CONNECTION ESTABLISHED. READY FOR INPUT.",
-  ];
+  useEffect(() => {
+    if (hasAnimated.current) {
+        return;
+    }
 
+    const introLines = [
+      "INITIALIZING CONTACT PROTOCOL...",
+      "ESTABLISHING SECURE CONNECTION...",
+      "CONNECTION ESTABLISHED. READY FOR INPUT.",
+    ];
+
+    let lineIndex = 0;
+    let charIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+
+    const typeChar = () => {
+        if (lineIndex >= introLines.length) {
+            setIsTyping(false);
+            setTimeout(() => setShowForm(true), 300);
+            return;
+        }
+
+        const currentLine = introLines[lineIndex];
+
+        setDisplayedLines(prev => {
+            const newLines = [...prev];
+            if (newLines.length <= lineIndex) {
+              newLines.push('');
+            }
+            newLines[lineIndex] = `> ${currentLine.substring(0, charIndex + 1)}`;
+            return newLines;
+        });
+
+        charIndex++;
+
+        if (charIndex > currentLine.length) {
+            charIndex = 0;
+            lineIndex++;
+            timeoutId = setTimeout(typeChar, 200);
+        } else {
+            timeoutId = setTimeout(typeChar, 50);
+        }
+    };
+
+    typeChar();
+
+    return () => {
+        clearTimeout(timeoutId);
+        hasAnimated.current = true;
+    };
+  }, []);
+
+  
   const submissionSteps = [
     "Validating input fields... [OK]",
     "Encrypting message payload... [OK]",
@@ -125,36 +148,46 @@ export default function Contact() {
     play('error');
   }
 
+  const introLines = [
+    "INITIALIZING CONTACT PROTOCOL...",
+    "ESTABLISHING SECURE CONNECTION...",
+    "CONNECTION ESTABLISHED. READY FOR INPUT.",
+  ];
+
   return (
     <div className="p-4 font-body h-full overflow-y-auto">
       <div className="font-headline text-[8px] md:text-[10px] text-primary h-24">
-        {headerLines.map((line, index) =>
-          index <= headerLine ? (
-            <TypingLine
-              key={index}
-              text={line}
-              onFinished={() => setHeaderLine(i => i + 1)}
-            />
-          ) : null
-        )}
+        {displayedLines.map((line, index) => (
+          <p key={index}>
+            {line}
+            {isTyping && index === displayedLines.length - 1 && line.length < introLines[index].length + 2 && (
+               <span className="inline-block w-2 h-3 bg-primary animate-pulse ml-1 translate-y-px"></span>
+            )}
+          </p>
+        ))}
       </div>
 
-      {status !== 'success' && status !== 'submitting' && headerLine > 2 && (
-        <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="flex flex-col gap-4 animate-in fade-in-0 duration-500">
-          <FormField id="name" label="enter_name" register={register} error={errors.name?.message} />
-          <FormField id="email" label="enter_email" register={register} error={errors.email?.message} type="email" />
-          <FormField id="subject" label="enter_subject" register={register} error={errors.subject?.message} />
-          <FormField id="message" label="enter_message" register={register} error={errors.message?.message} type="textarea" rows={4} />
+      <div className={cn(
+          'transition-opacity duration-300',
+          showForm ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden pointer-events-none'
+      )}>
+        {status !== 'success' && status !== 'submitting' && (
+          <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="flex flex-col gap-4">
+            <FormField id="name" label="enter_name" register={register} error={errors.name?.message} />
+            <FormField id="email" label="enter_email" register={register} error={errors.email?.message} type="email" />
+            <FormField id="subject" label="enter_subject" register={register} error={errors.subject?.message} />
+            <FormField id="message" label="enter_message" register={register} error={errors.message?.message} type="textarea" rows={4} />
 
-          <button
-            type="submit"
-            onClick={() => play('click')}
-            className="w-full font-headline text-[8px] mt-4 p-2 border-2 border-primary bg-black/30 text-primary hover:bg-accent hover:text-accent-foreground"
-          >
-            [ EXECUTE SEND.sh ]
-          </button>
-        </form>
-      )}
+            <button
+              type="submit"
+              onClick={() => play('click')}
+              className="w-full font-headline text-[8px] mt-4 p-2 border-2 border-primary bg-black/30 text-primary hover:bg-accent hover:text-accent-foreground"
+            >
+              [ EXECUTE SEND.sh ]
+            </button>
+          </form>
+        )}
+      </div>
       
       {(status === 'submitting' || status === 'success') && (
         <div className="font-body text-base text-primary/90 flex flex-col gap-1">
