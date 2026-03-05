@@ -1,17 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { Github, Linkedin, Mail, FileText, Volume2 } from 'lucide-react';
+import { Github, Linkedin, Mail, FileText, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Clock from './Clock';
 import StartMenu from './StartMenu';
 import { useWindowStore } from '@/store/windowStore';
 import { getLucideIcon } from '@/lib/icons';
+import { useSoundStore } from '@/store/soundStore';
+import { getPageComponent } from '../pages';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Taskbar = () => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const StartIcon = getLucideIcon('logo');
-  const { windows, focusWindow, toggleMinimize } = useWindowStore();
+  const { windows, focusWindow, toggleMinimize, openWindow } = useWindowStore();
+  const { isSoundEnabled, toggleSound } = useSoundStore();
+  const ContactPageComponent = getPageComponent('contact');
+
 
   const handleTabClick = (id: string, isMinimized: boolean) => {
       if (isMinimized) {
@@ -28,6 +34,16 @@ const Taskbar = () => {
             toggleMinimize(id);
         }
       }
+  }
+  
+  const handleContactClick = () => {
+    if (ContactPageComponent) {
+      openWindow('contact', 'CONTACT.sh', <ContactPageComponent />);
+    }
+  }
+
+  const handleResumeDownload = () => {
+    window.open('/resume/chiranjeev-agarwal-resume.pdf', '_blank');
   }
 
   return (
@@ -74,9 +90,22 @@ const Taskbar = () => {
       <div className="flex items-center gap-3">
         <a href="https://github.com/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Github size={16} /></a>
         <a href="https://linkedin.com/in/chiranjeev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent"><Linkedin size={16} /></a>
-        <button className="text-primary hover:text-accent"><Mail size={16} /></button>
-        <button className="text-primary hover:text-accent"><FileText size={16} /></button>
-        <button className="text-primary hover:text-accent"><Volume2 size={16} /></button>
+        <button onClick={handleContactClick} className="text-primary hover:text-accent"><Mail size={16} /></button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={handleResumeDownload} className="text-primary hover:text-accent">
+                <FileText size={16} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Download Resume</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <button onClick={toggleSound} className="text-primary hover:text-accent">
+          {isSoundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+        </button>
         <div className="w-px h-6 bg-border/50 mx-1" />
         <Clock />
       </div>
