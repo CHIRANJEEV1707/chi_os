@@ -58,8 +58,6 @@ const FormField = ({ id, label, register, error, type = 'text', rows }: {
 export default function Contact() {
   const [displayedLines, setDisplayedLines] = useState<string[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const hasAnimated = useRef(false);
-
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const [submissionLog, setSubmissionLog] = useState<string[]>([]);
   const { play } = useSoundEffect();
@@ -75,49 +73,49 @@ export default function Contact() {
   ];
 
   useEffect(() => {
-    if (hasAnimated.current) {
-        setDisplayedLines(lines);
-        setShowForm(true);
-        return;
-    }
+    const timeouts: NodeJS.Timeout[] = [];
     
-    let currentLineIndex = 0;
-    let currentCharIndex = 0;
-    let currentLines: string[] = [];
-    let timeoutId: NodeJS.Timeout;
+    const startTypewriter = () => {
+      let currentLineIndex = 0;
+      let currentCharIndex = 0;
+      let currentLines: string[] = [];
   
-    const typeNextChar = () => {
-      if (currentLineIndex >= lines.length) {
-        setShowForm(true);
-        hasAnimated.current = true;
-        return;
-      }
+      const typeNextChar = () => {
+        if (currentLineIndex >= lines.length) {
+          setShowForm(true);
+          return;
+        }
   
-      const currentLine = lines[currentLineIndex];
+        const currentLine = lines[currentLineIndex];
   
-      if (currentCharIndex === 0) {
-        currentLines = [...currentLines, ''];
-      }
+        if (currentCharIndex === 0) {
+          currentLines = [...currentLines, ''];
+        }
   
-      currentCharIndex++;
-      const updatedLines = currentLines.map((line, i) =>
-        i === currentLineIndex ? currentLine.slice(0, currentCharIndex) : line
-      );
-      currentLines = updatedLines;
-      setDisplayedLines([...updatedLines]);
+        currentCharIndex++;
+        const updatedLines = currentLines.map((line, i) =>
+          i === currentLineIndex ? currentLine.slice(0, currentCharIndex) : line
+        );
+        currentLines = updatedLines;
+        setDisplayedLines([...updatedLines]);
   
-      if (currentCharIndex >= currentLine.length) {
-        currentLineIndex++;
-        currentCharIndex = 0;
-        timeoutId = setTimeout(typeNextChar, 300);
-      } else {
-        timeoutId = setTimeout(typeNextChar, 50);
-      }
+        if (currentCharIndex >= currentLine.length) {
+          currentLineIndex++;
+          currentCharIndex = 0;
+          timeouts.push(setTimeout(typeNextChar, 300));
+        } else {
+          timeouts.push(setTimeout(typeNextChar, 50));
+        }
+      };
+      timeouts.push(setTimeout(typeNextChar, 300));
     };
-  
-    timeoutId = setTimeout(typeNextChar, 300);
 
-    return () => clearTimeout(timeoutId);
+    const mountDelay = setTimeout(startTypewriter, 100);
+    timeouts.push(mountDelay);
+    
+    return () => {
+      timeouts.forEach(clearTimeout);
+    };
   }, []);
   
   const submissionSteps = [
@@ -147,7 +145,7 @@ export default function Contact() {
   }
 
   return (
-    <div className="p-4 font-body h-full overflow-y-auto">
+    <div className="p-4 font-body min-h-full overflow-y-auto" style={{ background: '#0a120a' }}>
       <div className="font-headline text-[8px] md:text-[10px] text-primary h-24">
         {displayedLines.map((line, i) => (
           <p key={i}>
