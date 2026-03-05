@@ -131,21 +131,27 @@
     animation: phosphor-flicker 10s linear infinite;
   }
 
-  .react-resizable-handle-se {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    bottom: 0px;
-    right: 0px;
-    cursor: se-resize;
-    background:
-      linear-gradient(to left, hsl(var(--primary)) 2px, transparent 2px) 0 100%,
-      linear-gradient(to top, hsl(var(--primary)) 2px, transparent 2px) 100% 0,
-      linear-gradient(to left, hsl(var(--primary)) 2px, transparent 2px) 0 100%,
-      linear-gradient(to top, hsl(var(--primary)) 2px, transparent 2px) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 8px 8px;
+  .window-resizing {
+    outline: 1px dashed hsl(var(--primary));
   }
+
+  .resize-handle {
+    position: absolute;
+    z-index: 20;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .resize-handle-top { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+  .resize-handle-bottom { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+  .resize-handle-left { left: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+  .resize-handle-right { right: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+  
+  .resize-handle-top-left { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+  .resize-handle-top-right { top: -4px; right: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+  .resize-handle-bottom-left { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+  .resize-handle-bottom-right { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+
 }
 
 @keyframes phosphor-flicker {
