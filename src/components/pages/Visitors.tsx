@@ -7,6 +7,7 @@ import { Globe, MapPin, Users, Calendar } from 'lucide-react';
 import { formatDistanceToNowStrict, isToday } from 'date-fns';
 import { useVisitorStore } from '@/store/visitorStore';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SEED_VISITORS } from '@/lib/visitorsData';
 
 const MAP_WIDTH = 1000;
 const MAP_HEIGHT = 500;
