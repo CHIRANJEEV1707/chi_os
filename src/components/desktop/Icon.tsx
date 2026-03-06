@@ -88,7 +88,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
               {icon.icon}
             </span>
           </div>
-          <span className={cn('text-[10px] leading-tight font-headline text-primary break-words', selected ? 'bg-selection-bg text-selection-text p-1' : 'p-1')}>
+          <span className={cn('text-[10px] leading-tight font-headline text-primary break-all', selected ? 'bg-selection-bg text-selection-text p-1' : 'p-1')}>
             {icon.label}
           </span>
         </button>
