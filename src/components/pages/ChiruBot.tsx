@@ -153,16 +153,24 @@ export default function ChiruBot() {
                 body: JSON.stringify({ messages: newApiMessages.map(({role, content}) => ({role, content})).slice(-10) })
             });
 
-            if (!res.ok) throw new Error('Network response was not ok.');
-
             const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'A network error occurred.');
+            }
+
+            if (!data.message) {
+                throw new Error(data.error || 'No response message from AI.');
+            }
+
             const newDailyCount = dailyCount + 1;
             setDailyCount(newDailyCount);
             localStorage.setItem(getDailyLimitKey(), newDailyCount.toString());
 
             streamMessage(data.message, botMessageId);
-        } catch (error) {
-            setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, role: 'assistant', content: "CONNECTION INTERRUPTED. Please try again.", isError: true, isTyping: false } : m));
+        } catch (error: any) {
+            const errorMessage = error?.message || "CONNECTION INTERRUPTED. Please try again.";
+            setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, role: 'assistant', content: errorMessage, isError: true, isTyping: false } : m));
         } finally {
             setIsLoading(false);
         }
@@ -234,3 +242,5 @@ function getPageComponent(id: string): React.ComponentType | null {
   }
   return null;
 }
+
+    
