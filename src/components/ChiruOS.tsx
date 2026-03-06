@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { IconManagerProvider } from '@/context/IconManagerContext';
 import { initSoundSystem } from '@/lib/sounds';
 import { useAchievementStore } from '@/store/achievementStore';
+import { useQuestStore } from '@/store/questStore';
 
 export type WallpaperType = 'matrix' | 'grid' | 'plain';
 
@@ -20,6 +21,7 @@ export default function ChiruOS() {
   const [isExiting, setIsExiting] = useState(false);
   const [wallpaper, setWallpaper] = useState<WallpaperType>('matrix');
   const { unlock } = useAchievementStore();
+  const { completeTask } = useQuestStore();
 
   useEffect(() => {
     // Initialize sound system on the first user interaction
@@ -31,6 +33,7 @@ export default function ChiruOS() {
       setIsExiting(false);
       setRenderScreensaver(true);
       unlock('insomniac');
+      completeTask('trigger_screensaver');
     } else if (!isIdle && renderScreensaver) {
       setIsExiting(true);
       const timer = setTimeout(() => {
@@ -39,7 +42,7 @@ export default function ChiruOS() {
       }, 500); // This must match the fade-out animation duration
       return () => clearTimeout(timer);
     }
-  }, [isIdle, renderScreensaver, unlock]);
+  }, [isIdle, renderScreensaver, unlock, completeTask]);
 
   const cycleWallpaper = () => {
     setWallpaper(current => {

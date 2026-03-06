@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -7,6 +8,7 @@ import * as z from 'zod';
 import { cn } from '@/lib/utils';
 import { Github, Linkedin, Mail } from 'lucide-react';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useQuestStore } from '@/store/questStore';
 
 // --- Schema ---
 const contactSchema = z.object({
@@ -61,6 +63,7 @@ export default function Contact() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const [submissionLog, setSubmissionLog] = useState<string[]>([]);
   const { play } = useSoundEffect();
+  const { completeTask } = useQuestStore();
 
   const { register, handleSubmit, formState: { errors } } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -129,6 +132,7 @@ export default function Contact() {
   const onSubmit = (data: ContactFormData) => {
     play('success');
     setStatus('submitting');
+    completeTask('contact_me');
     let logIndex = 0;
     const interval = setInterval(() => {
       setSubmissionLog(prev => [...prev, submissionSteps[logIndex]]);

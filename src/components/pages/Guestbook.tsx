@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useAchievementStore } from '@/store/achievementStore';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useQuestStore } from '@/store/questStore';
 
 export default function Guestbook() {
     const { unlock } = useAchievementStore();
+    const { completeTask } = useQuestStore();
     const { play } = useSoundEffect();
     const [name, setName] = useState('');
     const [message, setMessage] =useState('');
@@ -19,6 +21,7 @@ export default function Guestbook() {
         }
         play('success');
         unlock('signed');
+        completeTask('sign_guestbook');
         setSubmitted(true);
     };
 

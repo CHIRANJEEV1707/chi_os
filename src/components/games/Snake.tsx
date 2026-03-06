@@ -6,6 +6,7 @@ import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { cn } from '@/lib/utils';
 import { GAME_SETTINGS } from '@/lib/constants';
 import { useAchievementStore } from '@/store/achievementStore';
+import { useQuestStore } from '@/store/questStore';
 
 const {
   CANVAS_WIDTH,
@@ -28,6 +29,7 @@ export default function Snake() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { play } = useSoundEffect();
   const { unlock } = useAchievementStore();
+  const { completeTask } = useQuestStore();
 
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
@@ -109,7 +111,10 @@ export default function Snake() {
     if (score >= 100) {
       unlock('snake_master');
     }
-  }, [score, unlock]);
+    if (score >= 50) {
+        completeTask('get_score');
+    }
+  }, [score, unlock, completeTask]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

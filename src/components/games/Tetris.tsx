@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { cn } from '@/lib/utils';
 import { useAchievementStore } from '@/store/achievementStore';
+import { useQuestStore } from '@/store/questStore';
 
 // --- Constants ---
 const CANVAS_WIDTH = 240;
@@ -56,6 +57,7 @@ export default function Tetris() {
     const nextCanvasRef = useRef<HTMLCanvasElement>(null);
     const { play } = useSoundEffect();
     const { unlock } = useAchievementStore();
+    const { completeTask } = useQuestStore();
 
     const [gameState, setGameState] = useState<GameState>('IDLE');
     const [score, setScore] = useState(0);
@@ -70,6 +72,12 @@ export default function Tetris() {
     const gameLoopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lockDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const animationFrameRef = useRef<number>();
+
+    useEffect(() => {
+        if (score >= 50) {
+            completeTask('get_score');
+        }
+    }, [score, completeTask]);
 
     // --- Game Logic Callbacks ---
     const resetBag = useCallback(() => {

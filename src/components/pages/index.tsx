@@ -13,6 +13,9 @@ import React from 'react';
 import AboutOS from './AboutOS';
 import ChiruBot from './ChiruBot';
 import Achievements from './Achievements';
+import Quests from './Quests';
+import Bizcard from './Bizcard';
+import SecretMessage from './SecretMessage';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -24,12 +27,16 @@ const pageMap: { [key: string]: React.ComponentType } = {
   contact: Contact,
   guestbook: Guestbook,
   games: Games,
+  achievements: Achievements,
+  quests: Quests,
+  bizcard: Bizcard,
+  'secret-message': SecretMessage,
   terminal: Terminal,
   trash: Trash,
   'about-os': AboutOS,
-  achievements: Achievements,
 };
 
 export const getPageComponent = (id: string): React.ComponentType | null => {
-  return pageMap[id] || null;
+  const cleanId = id.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '');
+  return pageMap[cleanId] || null;
 };

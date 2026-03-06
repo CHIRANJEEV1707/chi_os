@@ -6,6 +6,7 @@ import { WindowState } from '@/lib/types';
 import React, { ReactNode } from 'react';
 import { DESKTOP_ICONS } from '@/lib/data';
 import { useAchievementStore } from './achievementStore';
+import { useQuestStore } from './questStore';
 
 const BASE_Z_INDEX = 100;
 
@@ -28,6 +29,20 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   contactOpenKey: 0,
   openedWindowIds: new Set(),
   openWindow: (id, title, content) => {
+    // --- Quest Completion ---
+    const { completeTask } = useQuestStore.getState();
+    const taskMap: Record<string, string> = {
+      'about': 'open_about',
+      'projects': 'open_projects',
+      'terminal': 'open_terminal',
+      'experience': 'read_experience',
+      'resume': 'view_resume',
+    };
+    if (taskMap[id]) {
+      completeTask(taskMap[id]);
+    }
+    // --- End Quest Completion ---
+    
     // --- Achievement Unlocks ---
     const { unlock, isUnlocked } = useAchievementStore.getState();
 

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { useUiStore } from '@/store/uiStore';
 import { useAchievementStore } from '@/store/achievementStore';
+import { useQuestStore } from '@/store/questStore';
 
 const SUGGESTIONS = [
     "What makes you different?",
@@ -40,7 +41,7 @@ type Message = {
 };
 
 const BotAvatar = ({ isRoasting, isTyping, className }: { isRoasting: boolean; isTyping: boolean; className?: string }) => {
-  const animationStyle = isTyping ? { animation: 'pulse 0.8s infinite alternate' } : { animation: 'bounce 2s infinite' };
+  const animationStyle = isTyping ? { animation: 'pulse 0.8s infinite alternate' } : { animation: 'idle-bounce 2s ease-in-out infinite' };
 
   return (
     <div
@@ -108,6 +109,7 @@ export default function ChiruBot() {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const { triggerGlitch } = useUiStore();
     const { unlock, isUnlocked } = useAchievementStore();
+    const { completeTask } = useQuestStore();
     
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -194,6 +196,9 @@ export default function ChiruBot() {
         if (userMessageCount.current >= 5 && !isUnlocked('interviewer')) {
             unlock('interviewer');
         }
+        if (userMessageCount.current > 0) {
+            completeTask('chat_bot');
+        }
         
         if (isRoastMessage(messageContent)) {
             setIsRoasting(true);
@@ -254,7 +259,7 @@ export default function ChiruBot() {
     }
 
     return (
-        <div className="h-full flex flex-col bg-[#050a05]">
+        <div className={cn("h-full flex flex-col bg-[#050a05]", isRoasting && 'glitch-active')}>
             <header className="p-2 border-b-2 border-primary/20 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <BotAvatar isRoasting={isRoasting} isTyping={isBotTyping} />

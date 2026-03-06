@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { useAchievementStore } from '@/store/achievementStore';
+import { useQuestStore } from '@/store/questStore';
 
 // --- Constants ---
 const CANVAS_WIDTH = 480;
@@ -66,6 +67,7 @@ export default function Invaders() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { play } = useSoundEffect();
     const { unlock } = useAchievementStore();
+    const { completeTask } = useQuestStore();
 
     const [gameState, setGameState] = useState<GameState>('IDLE');
     const [score, setScore] = useState(0);
@@ -326,7 +328,9 @@ export default function Invaders() {
                     if (invader.alive && checkRectCollision(playerBulletRef.current, invader)) {
                         invader.alive = false;
                         playerBulletRef.current.active = false;
-                        setScore(s => s + invader.points);
+                        const newScore = score + invader.points;
+                        setScore(newScore);
+                        if (newScore >= 50) completeTask('get_score');
                         
                         const newRemainingCount = invadersRef.current.filter(i => i.alive).length;
                         invaderSpeedRef.current = 0.5 + (55 - newRemainingCount) * 0.04;
@@ -343,7 +347,9 @@ export default function Invaders() {
                     playerBulletRef.current.active = false;
                     const ufoScores = [50, 100, 150, 300];
                     const ufoScore = ufoScores[Math.floor(Math.random() * ufoScores.length)];
-                    setScore(s => s + ufoScore);
+                    const newScore = score + ufoScore;
+                    setScore(newScore);
+                    if (newScore >= 50) completeTask('get_score');
                     floatingScoresRef.current.push({x: ufoRef.current.x, y: ufoRef.current.y, value: ufoScore, life: 60});
                     play('success');
                 }
@@ -532,7 +538,7 @@ export default function Invaders() {
         }
         
         requestAnimationFrame(gameLoop);
-    }, [gameState, wave, score, highScore, lives, play, unlock, createInvaders]);
+    }, [gameState, wave, score, highScore, lives, play, unlock, createInvaders, completeTask]);
     
     // Draw pixel art helper
     const drawPixelArt = (ctx: CanvasRenderingContext2D, shape: number[][], x: number, y: number, pixelSize: number, color: string) => {

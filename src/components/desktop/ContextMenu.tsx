@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -5,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useWindowStore } from '@/store/windowStore';
 import { getPageComponent } from '../pages';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useQuestStore } from '@/store/questStore';
 
 type ContextMenuProps = {
   x: number;
@@ -18,6 +20,7 @@ export function ContextMenu({ x, y, onClose, onCycleWallpaper, onRefreshDesktop 
   const menuRef = useRef<HTMLDivElement>(null);
   const { openWindow } = useWindowStore();
   const { play } = useSoundEffect();
+  const { completeTask } = useQuestStore();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -71,7 +74,8 @@ export function ContextMenu({ x, y, onClose, onCycleWallpaper, onRefreshDesktop 
 
   const handleSecret = () => {
     play('click');
-    console.log("🤫 You found a secret! More to come...");
+    completeTask('right_click_secret');
+    console.log("🤫 You found a secret! Check your Quests.");
     onClose();
   };
 

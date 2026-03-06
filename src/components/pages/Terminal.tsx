@@ -7,6 +7,7 @@ import { DESKTOP_ICONS } from '@/lib/data';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { getPageComponent } from '.';
 import { useAchievementStore } from '@/store/achievementStore';
+import { useQuestStore } from '@/store/questStore';
 
 const sections = DESKTOP_ICONS.map(icon => icon.id.replace('.exe', '').replace('/', ''));
 const games = ['snake', 'minesweeper', 'pong', 'tetris', 'invaders', 'sudoku', 'battleship'];
@@ -108,6 +109,7 @@ export default function Terminal() {
     const { openWindow } = useWindowStore();
     const { play } = useSoundEffect();
     const { unlock } = useAchievementStore.getState();
+    const { completeTask } = useQuestStore();
 
     const [input, setInput] = useState('');
     const [output, setOutput] = useState<React.ReactNode[]>([]);
@@ -253,11 +255,13 @@ export default function Terminal() {
             addOutput("> Entering the Matrix...");
             play('success');
             unlock('matrix');
+            completeTask('find_terminal_secret');
             setShowMatrix(true);
         },
         'sudo': async (args) => {
             if (args.join(' ') === 'rm -rf /') {
                 play('error');
+                completeTask('find_terminal_secret');
                 await new Promise(r => setTimeout(r, 500)); addOutput("> WARNING: Deleting system files...");
                 await new Promise(r => setTimeout(r, 500)); addOutput("> Removing creativity... [OK]");
                 await new Promise(r => setTimeout(r, 500)); addOutput("> Removing personality... [OK]");
@@ -271,6 +275,7 @@ export default function Terminal() {
             if (args[0] === 'me') {
                 play('success');
                 unlock('hired');
+                completeTask('find_terminal_secret');
                 
                 const lines = [
                     { text: "> EXCELLENT CHOICE DETECTED!", delay: 0 },

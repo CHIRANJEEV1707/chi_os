@@ -17,7 +17,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'gamer', icon: '🕹️', title: 'GAMER', desc: 'Played every game in the arcade', secret: false },
   { id: 'snake_master', icon: '🐍', title: 'SNAKE MASTER', desc: 'Scored 100+ in Snake', secret: false },
   { id: 'minesweeper_god', icon: '💣', title: 'LUCKY ESCAPE', desc: 'Won Minesweeper on Hard', secret: false },
-  { id: 'tetris_line', icon: '🧱', title: 'TETRIS!', desc: 'Cleared 4 lines at once in Tetris', secret: false },
+  { id: 'tetris_line', icon: '🟩', title: 'TETRIS!', desc: 'Cleared 4 lines at once in Tetris', secret: false },
   { id: 'invader_slayer', icon: '👾', title: 'INVADER SLAYER', desc: 'Cleared Wave 1 in Invaders', secret: false },
 
   // Easter egg achievements
@@ -32,5 +32,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'interviewer', icon: '🎤', title: 'INTERVIEWER', desc: 'Asked CHIRU-BOT 5+ questions', secret: false },
   { id: 'printer', icon: '🖨️', title: 'OLD SCHOOL', desc: 'Used the print feature on the resume', secret: true },
   { id: 'shutdown', icon: '⚡', title: 'GOODBYE', desc: 'Tried to shut down the OS', secret: true },
-  { id: 'business_card', icon: '💼', title: 'NETWORKER', desc: 'Discovered the foldable resume card', secret: true },
+  { id: 'business_card', icon: '💼', title: 'NETWORKER', desc: 'Discovered the foldable resume card', secret: false },
+  { id: 'completionist', icon: '🏅', title: 'COMPLETIONIST', desc: 'Completed all quests', secret: true },
 ];

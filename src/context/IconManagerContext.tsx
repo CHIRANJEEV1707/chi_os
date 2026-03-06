@@ -1,8 +1,9 @@
+
 'use client';
 
-import React, { createContext, useState, ReactNode, useContext } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
 import { IconState } from '@/lib/types';
-import { INITIAL_ICON_POSITIONS } from '@/lib/data';
+import { DESKTOP_ICONS, INITIAL_ICON_POSITIONS } from '@/lib/data';
 
 interface IconManagerContextType {
   icons: IconState[];
@@ -15,9 +16,35 @@ export const IconManagerContext = createContext<IconManagerContextType | undefin
 const BASE_Z_INDEX = 1;
 
 export const IconManagerProvider = ({ children }: { children: ReactNode }) => {
-  const [icons, setIcons] = useState<IconState[]>(
-    INITIAL_ICON_POSITIONS.map((icon) => ({ ...icon, zIndex: BASE_Z_INDEX }))
-  );
+  const [icons, setIcons] = useState<IconState[]>([]);
+
+  useEffect(() => {
+    const calculatePositions = () => {
+        const calculatedIcons = INITIAL_ICON_POSITIONS.map(config => {
+            const definition = DESKTOP_ICONS.find(d => d.id === config.id);
+            if (!definition) return null;
+
+            let { x, y } = config.position;
+
+            // Negative values are flags for right/bottom alignment
+            if (x < 0) x = window.innerWidth + x;
+            if (y < 0) y = window.innerHeight + y;
+
+            return {
+                ...definition,
+                position: { x, y },
+                zIndex: BASE_Z_INDEX,
+            };
+        }).filter((icon): icon is IconState => icon !== null);
+
+        setIcons(calculatedIcons);
+    }
+    
+    calculatePositions();
+    window.addEventListener('resize', calculatePositions);
+    return () => window.removeEventListener('resize', calculatePositions);
+
+  }, []);
 
   const updateIconPosition = (id: string, position: { x: number; y: number }) => {
     setIcons(prevIcons =>

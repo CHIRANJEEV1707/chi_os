@@ -4,6 +4,7 @@ import {
     Folder,
     Cpu,
     Briefcase,
+    FileText,
     Gamepad2,
     Terminal,
     LucideIcon,
@@ -15,6 +16,11 @@ import {
     Info,
     Bot,
     Trophy,
+    Scroll,
+    CreditCard,
+    Trash2,
+    Mail,
+    PenSquare,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
@@ -24,6 +30,10 @@ import {
     skills: Cpu,
     briefcase: Briefcase,
     experience: Briefcase,
+    file: FileText,
+    resume: FileText,
+    contact: Mail,
+    guestbook: PenSquare,
     gamepad: Gamepad2,
     games: Gamepad2,
     prompt: Terminal,
@@ -38,6 +48,11 @@ import {
     'chiru-bot': Bot,
     trophy: Trophy,
     achievements: Trophy,
+    scroll: Scroll,
+    quests: Scroll,
+    'credit-card': CreditCard,
+    bizcard: CreditCard,
+    trash: Trash2,
     logo: Cat, // Placeholder for CHIRU-OS logo
     copy: Copy,
     'about-os': Info,
@@ -45,6 +60,7 @@ import {
   };
   
   export const getLucideIcon = (iconName: string): LucideIcon => {
-    return iconMap[iconName] || iconMap.default;
+    const iconKey = iconName.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '');
+    return iconMap[iconKey] || iconMap.default;
   };
   
