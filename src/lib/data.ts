@@ -5,6 +5,7 @@ export const DESKTOP_ICONS = [
     { "id": "projects", "label": "PROJECTS/", "icon": "📁" },
     { "id": "startups", "label": "STARTUPS/", "icon": "🚀", "size": { "width": 680, "height": 560 } },
     { "id": "case-studies", "label": "CASE_STUDIES/", "icon": "🔬", "size": { "width": 680, "height": 520 } },
+    { "id": "thoughts", "label": "THOUGHTS.log", "icon": "📝", "size": { "width": 500, "height": 520 } },
     { "id": "skills", "label": "SKILLS.sys", "icon": "⚙️" },
     { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
     { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
@@ -28,19 +29,26 @@ export const INITIAL_ICON_POSITIONS = [
     { id: 'projects', position: { x: 24, y: 136 } },
     { id: 'startups', position: { x: 24, y: 248 } },
     { id: 'case-studies', position: { x: 24, y: 360 } },
-    { id: 'experience', position: { x: 24, y: 472 } },
+    { id: 'thoughts', position: { x: 24, y: 472 } },
+
     // Second column
-    { id: 'chiru-bot', position: { x: 120, y: 24 } },
-    { id: 'skills', position: { x: 120, y: 136 } },
-    { id: 'contact', position: { x: 120, y: 248 } },
-    { id: 'resume', position: { x: 120, y: 360 } },
-    { id: 'pitch', position: { x: 120, y: 472 } },
-    // Right side (negative values are offsets from right/bottom)
+    { id: 'experience', position: { x: 120, y: 24 } },
+    { id: 'chiru-bot', position: { x: 120, y: 136 } },
+    { id: 'skills', position: { x: 120, y: 248 } },
+    { id: 'contact', position: { x: 120, y: 360 } },
+    { id: 'resume', position: { x: 120, y: 472 } },
+    
+    // Right side
     { id: 'games', position: { x: -120, y: 24 } },
     { id: 'achievements', position: { x: -120, y: 136 } },
     { id: 'quests', position: { x: -120, y: 248 } },
     { id: 'terminal', position: { x: -120, y: 360 } },
     { id: 'bizcard', position: { x: -120, y: 472 } },
+
+    // Second to last column on right
+    { id: 'pitch', position: { x: -216, y: 24 } },
+    { id: 'guestbook', position: { x: -216, y: 136 } },
+    
     // Far bottom right
     { id: 'trash', position: { x: -120, y: -180 } },
 ];

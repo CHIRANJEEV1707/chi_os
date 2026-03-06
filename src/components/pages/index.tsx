@@ -20,6 +20,7 @@ import SecretMessage from './SecretMessage';
 import Startups from './Startups';
 import PitchDeck from './PitchDeck';
 import CaseStudies from './CaseStudies';
+import Thoughts from './Thoughts';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -41,6 +42,7 @@ const pageMap: { [key: string]: React.ComponentType } = {
   trash: Trash,
   'about-os': AboutOS,
   pitch: PitchDeck,
+  thoughts: Thoughts,
 };
 
 export const getPageComponent = (id: string): React.ComponentType | null => {
