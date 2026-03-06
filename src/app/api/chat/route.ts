@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     and self-deprecating about building an entire OS as a portfolio.`
 
     const completion = await groq.chat.completions.create({
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages.slice(-10)
