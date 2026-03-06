@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { cn } from '@/lib/utils';
 import { GAME_SETTINGS } from '@/lib/constants';
+import { useAchievementStore } from '@/store/achievementStore';
 
 const {
   CANVAS_WIDTH,
@@ -26,6 +27,7 @@ type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export default function Snake() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { play } = useSoundEffect();
+  const { unlock } = useAchievementStore();
 
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
@@ -102,6 +104,12 @@ export default function Snake() {
     setHighScore(Number(localStorage.getItem('chiru-os-snake-high')) || 0);
     resetGame();
   }, [resetGame]);
+
+  useEffect(() => {
+    if (score >= 100) {
+      unlock('snake_master');
+    }
+  }, [score, unlock]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -377,5 +385,3 @@ export default function Snake() {
     </div>
   );
 }
-
-    

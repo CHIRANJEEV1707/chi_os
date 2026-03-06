@@ -1,15 +1,18 @@
+
 'use client';
 
 import { create } from 'zustand';
 import { WindowState } from '@/lib/types';
 import React, { ReactNode } from 'react';
+import { DESKTOP_ICONS } from '@/lib/data';
+import { useAchievementStore } from './achievementStore';
 
 const BASE_Z_INDEX = 100;
-const TASKBAR_HEIGHT = 40;
 
 interface WindowStore {
   windows: WindowState[];
   contactOpenKey: number;
+  openedWindowIds: Set<string>;
   openWindow: (id: string, title: string, content: ReactNode) => void;
   closeWindow: (id: string) => void;
   focusWindow: (id: string) => void;
@@ -23,8 +26,26 @@ interface WindowStore {
 export const useWindowStore = create<WindowStore>((set, get) => ({
   windows: [],
   contactOpenKey: 0,
+  openedWindowIds: new Set(),
   openWindow: (id, title, content) => {
+    // --- Achievement Unlocks ---
+    const { unlock, isUnlocked } = useAchievementStore.getState();
+
+    if (id === 'terminal' && !isUnlocked('hacker')) unlock('hacker');
+    if (id === 'trash' && !isUnlocked('recycler')) unlock('recycler');
+    // --- End Achievement Unlocks ---
+    
     set(state => {
+      // --- Achievement State Update ---
+      const newOpenedWindowIds = new Set(state.openedWindowIds);
+      newOpenedWindowIds.add(id);
+
+      const allAppsOpened = DESKTOP_ICONS.every(icon => newOpenedWindowIds.has(icon.id));
+      if (allAppsOpened && !isUnlocked('explorer')) {
+        unlock('explorer');
+      }
+      // --- End Achievement State Update ---
+      
       let newContactOpenKey = state.contactOpenKey;
       let finalContent = content;
 
@@ -40,6 +61,8 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       
       if (existingWindow) {
         return {
+          ...state,
+          openedWindowIds: newOpenedWindowIds,
           contactOpenKey: newContactOpenKey,
           windows: state.windows.map(w =>
             w.id === id ? { ...w, content: finalContent, isMinimized: false, zIndex: highestZIndex + 1 } : w
@@ -58,9 +81,16 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         isMaximized: false,
       };
       
+      const newWindows = [...state.windows, newWindow];
+      if (newWindows.length >= 5 && !isUnlocked('window_hoarder')) {
+        unlock('window_hoarder');
+      }
+      
       return { 
-          windows: [...state.windows, newWindow],
-          contactOpenKey: newContactOpenKey
+          ...state,
+          windows: newWindows,
+          contactOpenKey: newContactOpenKey,
+          openedWindowIds: newOpenedWindowIds,
       };
     });
   },

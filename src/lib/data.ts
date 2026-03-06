@@ -1,3 +1,4 @@
+
 export const DESKTOP_ICONS = [
     { "id": "about", "label": "ABOUT.exe", "icon": "👤" },
     { "id": "projects", "label": "PROJECTS/", "icon": "📁" },
@@ -7,6 +8,7 @@ export const DESKTOP_ICONS = [
     { "id": "contact", "label": "CONTACT.sh", "icon": "📡" },
     { "id": "chiru-bot", "label": "CHIRU-BOT.ai", "icon": "🤖" },
     { "id": "games", "label": "GAMES/", "icon": "🕹️" },
+    { "id": "achievements", "label": "AWARDS.log", "icon": "🏆" },
     { "id": "terminal", "label": "TERMINAL.exe", "icon": ">_" },
     { "id": "trash", "label": "RECYCLE.bin", "icon": "🗑️" }
 ];
@@ -25,6 +27,7 @@ export const START_MENU_ITEMS = [
     { id: "skills", "label": "Skills", "icon": "chip", "action": "open_window" },
     { id: "chiru-bot", "label": "AI Interview", "icon": "bot", "action": "open_window" },
     { id: "games", "label": "Games", "icon": "gamepad", "action": "open_window" },
+    { id: "achievements", "label": "Achievements", "icon": "trophy", "action": "open_window" },
     { id: "terminal", "label": "Terminal", "icon": "prompt", "action": "open_window" },
     { "divider": true },
     { id: "settings", "label": "Settings", "icon": "gear", "action": "open_window" },

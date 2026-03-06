@@ -1,3 +1,4 @@
+
 import {
     User,
     Folder,
@@ -13,6 +14,7 @@ import {
     Copy,
     Info,
     Bot,
+    Trophy,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
@@ -34,6 +36,8 @@ import {
     power: Power,
     bot: Bot,
     'chiru-bot': Bot,
+    trophy: Trophy,
+    achievements: Trophy,
     logo: Cat, // Placeholder for CHIRU-OS logo
     copy: Copy,
     'about-os': Info,

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -5,9 +6,10 @@ import { useWindowStore } from '@/store/windowStore';
 import { DESKTOP_ICONS } from '@/lib/data';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { getPageComponent } from '.';
+import { useAchievementStore } from '@/store/achievementStore';
 
 const sections = DESKTOP_ICONS.map(icon => icon.id.replace('.exe', '').replace('/', ''));
-const games = ['snake', 'minesweeper', 'pong', 'tetris', 'invaders'];
+const games = ['snake', 'minesweeper', 'pong', 'tetris', 'invaders', 'sudoku', 'battleship'];
 const allCommands = ['help', 'ls', 'open', 'whoami', 'skills', 'contact', 'github', 'linkedin', 'resume', 'play', 'clear', 'reboot', 'matrix', 'sudo', 'hire'];
 
 
@@ -105,6 +107,7 @@ export default function Terminal() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { openWindow } = useWindowStore();
     const { play } = useSoundEffect();
+    const { unlock } = useAchievementStore.getState();
 
     const [input, setInput] = useState('');
     const [output, setOutput] = useState<React.ReactNode[]>([]);
@@ -174,7 +177,7 @@ export default function Terminal() {
         open: async (args) => {
             const section = args[0];
             if (!section) return addError("> ERROR: 'open' requires a section. Type 'ls' to see options.");
-            if (sections.includes(section)) {
+            if (sections.includes(section) || section === 'achievements') {
                 const PageComponent = getPageComponent(section);
                 const app = DESKTOP_ICONS.find(i => i.id === section);
                 if (PageComponent && app) {
@@ -249,6 +252,7 @@ export default function Terminal() {
         matrix: async () => {
             addOutput("> Entering the Matrix...");
             play('success');
+            unlock('matrix');
             setShowMatrix(true);
         },
         'sudo': async (args) => {
@@ -266,6 +270,7 @@ export default function Terminal() {
         'hire': async (args) => {
             if (args[0] === 'me') {
                 play('success');
+                unlock('hired');
                 
                 const lines = [
                     { text: "> EXCELLENT CHOICE DETECTED!", delay: 0 },

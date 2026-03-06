@@ -1,7 +1,9 @@
+
 'use client';
 import React, { useState, useEffect, useReducer, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useAchievementStore } from '@/store/achievementStore';
 
 // --- Constants & Types ---
 const DIFFICULTIES = {
@@ -223,6 +225,7 @@ export default function Minesweeper() {
   const [highScores, setHighScores] = useState({ EASY: Infinity, MEDIUM: Infinity, HARD: Infinity });
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { play } = useSoundEffect();
+  const { unlock } = useAchievementStore();
 
   const { grid, status, mines, flags, clickedMine } = state;
   const { width, height } = DIFFICULTIES[difficulty];
@@ -279,6 +282,9 @@ export default function Minesweeper() {
 
       if (status === 'WON') {
         play('success');
+        if (difficulty === 'HARD') {
+          unlock('minesweeper_god');
+        }
         if (timer < highScores[difficulty]) {
           const newHighScores = { ...highScores, [difficulty]: timer };
           setHighScores(newHighScores);
@@ -290,7 +296,7 @@ export default function Minesweeper() {
         play('error');
       }
     }
-  }, [status, timer, difficulty, highScores, play]);
+  }, [status, timer, difficulty, highScores, play, unlock]);
 
   useEffect(() => {
     return () => {

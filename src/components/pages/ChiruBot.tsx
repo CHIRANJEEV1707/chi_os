@@ -1,9 +1,11 @@
+
 'use client';
 import { Bot, Send, CircleDot } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { useUiStore } from '@/store/uiStore';
+import { useAchievementStore } from '@/store/achievementStore';
 
 const SUGGESTIONS = [
     "What makes you different?",
@@ -105,10 +107,12 @@ export default function ChiruBot() {
     const [dailyCount, setDailyCount] = useState(0);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const { triggerGlitch } = useUiStore();
+    const { unlock, isUnlocked } = useAchievementStore();
     
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const messageIdCounter = useRef(1);
+    const userMessageCount = useRef(0);
     const { play } = useSoundEffect();
 
     useEffect(() => {
@@ -185,11 +189,17 @@ export default function ChiruBot() {
             setMessages(prev => [...prev, userMessage, errorMessage]);
             return;
         }
+
+        userMessageCount.current += 1;
+        if (userMessageCount.current >= 5 && !isUnlocked('interviewer')) {
+            unlock('interviewer');
+        }
         
         if (isRoastMessage(messageContent)) {
             setIsRoasting(true);
             play('error');
             triggerGlitch(600);
+            unlock('roasted');
         }
 
         const userMessage: Message = { id: `user-${messageIdCounter.current++}`, role: 'user', content: messageContent };

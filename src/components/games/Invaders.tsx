@@ -1,7 +1,9 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useAchievementStore } from '@/store/achievementStore';
 
 // --- Constants ---
 const CANVAS_WIDTH = 480;
@@ -63,6 +65,7 @@ const EXPLOSION_FRAMES = 8;
 export default function Invaders() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { play } = useSoundEffect();
+    const { unlock } = useAchievementStore();
 
     const [gameState, setGameState] = useState<GameState>('IDLE');
     const [score, setScore] = useState(0);
@@ -390,7 +393,13 @@ export default function Invaders() {
             // Check wave complete
             if (aliveInvaders.length === 0) {
                 setGameState('WAVE_COMPLETE');
-                setWave(w => w + 1);
+                setWave(w => {
+                    const newWave = w + 1;
+                    if (newWave === 2) {
+                        unlock('invader_slayer');
+                    }
+                    return newWave;
+                });
                 setTimeout(() => {
                     createInvaders(wave + 1);
                     invaderDirection.current = 'right';
@@ -523,7 +532,7 @@ export default function Invaders() {
         }
         
         requestAnimationFrame(gameLoop);
-    }, [gameState, wave, score, highScore, lives, play]);
+    }, [gameState, wave, score, highScore, lives, play, unlock, createInvaders]);
     
     // Draw pixel art helper
     const drawPixelArt = (ctx: CanvasRenderingContext2D, shape: number[][], x: number, y: number, pixelSize: number, color: string) => {

@@ -1,7 +1,9 @@
+
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { cn } from '@/lib/utils';
+import { useAchievementStore } from '@/store/achievementStore';
 
 // --- Constants ---
 const CANVAS_WIDTH = 240;
@@ -53,6 +55,7 @@ export default function Tetris() {
     const mainCanvasRef = useRef<HTMLCanvasElement>(null);
     const nextCanvasRef = useRef<HTMLCanvasElement>(null);
     const { play } = useSoundEffect();
+    const { unlock } = useAchievementStore();
 
     const [gameState, setGameState] = useState<GameState>('IDLE');
     const [score, setScore] = useState(0);
@@ -166,12 +169,15 @@ export default function Tetris() {
             setLines(l => l + linesCleared);
             setScore(s => s + LINE_CLEAR_SCORES[linesCleared] * level);
             setLevel(l => Math.floor((lines + linesCleared) / LINES_PER_LEVEL) + 1);
-            if (linesCleared === 4) play('success');
+            if (linesCleared === 4) {
+                play('success');
+                unlock('tetris_line');
+            }
             else play('click');
         }
 
         resetPlayer();
-    }, [level, lines, resetPlayer, play]);
+    }, [level, lines, resetPlayer, play, unlock]);
     
     const drop = useCallback((isSoftDrop: boolean) => {
         if (!playerRef.current || gameState !== 'PLAYING') return false;

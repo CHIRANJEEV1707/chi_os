@@ -1,9 +1,11 @@
+
 'use client';
 
 import { Download, Printer, X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useAchievementStore } from '@/store/achievementStore';
 
 // --- Reusable Data (from Experience.tsx) ---
 const experienceData = [
@@ -152,6 +154,7 @@ const PrintModal = ({ onClose }: { onClose: () => void }) => {
 
 export default function Resume() {
     const { play } = useSoundEffect();
+    const { unlock } = useAchievementStore();
     const [showPrintModal, setShowPrintModal] = useState(false);
 
     const handleDownload = () => {
@@ -161,6 +164,7 @@ export default function Resume() {
 
     const handlePrint = () => {
         play('click');
+        unlock('printer');
         window.print();
     };
 
@@ -169,6 +173,7 @@ export default function Resume() {
           if (event.ctrlKey && event.key.toLowerCase() === 'p') {
             event.preventDefault();
             play('success');
+            unlock('business_card');
             setShowPrintModal(true);
           }
           if (event.key === 'Escape' && showPrintModal) {
@@ -180,7 +185,7 @@ export default function Resume() {
         return () => {
           window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [showPrintModal, play]);
+    }, [showPrintModal, play, unlock]);
 
 
     return (
