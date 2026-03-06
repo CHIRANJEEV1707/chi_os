@@ -15,7 +15,7 @@ export const INITIAL_ICON_POSITIONS = DESKTOP_ICONS.map((icon, index) => ({
     ...icon,
     position: {
         x: (index % 2) === 0 ? 24 : 120,
-        y: Math.floor(index / 2) * 96 + 24
+        y: Math.floor(index / 2) * 112 + 24
     }
 }));
 

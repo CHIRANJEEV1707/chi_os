@@ -14,7 +14,7 @@ type IconProps = {
 };
 
 const ICON_WIDTH = 96;
-const ICON_HEIGHT = 96;
+const ICON_HEIGHT = 112;
 const TASKBAR_HEIGHT = 40;
 
 const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
@@ -69,7 +69,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
           onClick={handleClick}
           onBlur={handleBlur}
           className={cn(
-            'flex flex-col items-center gap-1 p-2 w-24 h-24 text-center rounded-md focus:outline-none',
+            'flex flex-col items-center gap-1 p-2 w-24 h-28 text-center rounded-md focus:outline-none',
             'animate-in fade-in-0 zoom-in-90 duration-300', // Entrance animation
             isDragging && 'opacity-70',
             selected ? 'bg-primary/30' : 'hover:bg-primary/10',
@@ -88,7 +88,7 @@ const Icon = ({ icon, bounds, onDoubleClick }: IconProps) => {
               {icon.icon}
             </span>
           </div>
-          <span className={cn('text-xs font-headline text-primary', selected ? 'bg-selection-bg text-selection-text p-1' : 'p-1')}>
+          <span className={cn('text-[10px] leading-tight font-headline text-primary break-words', selected ? 'bg-selection-bg text-selection-text p-1' : 'p-1')}>
             {icon.label}
           </span>
         </button>
