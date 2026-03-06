@@ -249,7 +249,7 @@
 .ping-pulse-outer {
   transform-origin: center;
   animation: ping-pulse-anim 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-  stroke: hsl(var(--primary));
+  stroke: hsl(var(--destructive));
   fill: transparent;
   stroke-width: 1px;
 }
