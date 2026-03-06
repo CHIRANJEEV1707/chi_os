@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -8,15 +9,48 @@ import Tetris from '@/components/games/Tetris';
 import Invaders from '@/components/games/Invaders';
 import Sudoku from '@/components/games/Sudoku';
 import Battleship from '@/components/games/Battleship';
+import { useAchievementStore } from '@/store/achievementStore';
 
 type Game = 'menu' | 'snake' | 'minesweeper' | 'pong' | 'tetris' | 'invaders' | 'sudoku' | 'battleship';
+const GAMES_LIST: Game[] = ['snake', 'minesweeper', 'pong', 'tetris', 'invaders', 'sudoku', 'battleship'];
+
+const getPlayedGames = (): Set<string> => {
+    try {
+        const stored = localStorage.getItem('chiru-os-played-games');
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+        return new Set();
+    }
+}
+
+const setPlayedGames = (games: Set<string>) => {
+    try {
+        localStorage.setItem('chiru-os-played-games', JSON.stringify(Array.from(games)));
+    } catch (e) {
+        console.error("Failed to save played games to localStorage", e);
+    }
+}
+
 
 export default function Games() {
     const [activeGame, setActiveGame] = useState<Game>('menu');
+    const { unlock, isUnlocked } = useAchievementStore();
+
+    const handleGameSelect = (game: Game) => {
+        const playedGames = getPlayedGames();
+        playedGames.add(game);
+        setPlayedGames(playedGames);
+
+        if (playedGames.size === GAMES_LIST.length && !isUnlocked('gamer')) {
+            unlock('gamer');
+        }
+
+        setActiveGame(game);
+    };
 
     const GameButton = ({ game, emoji, name }: { game: Game, emoji: string, name: string }) => (
         <button
-            onClick={() => setActiveGame(game)}
+            onClick={() => handleGameSelect(game)}
             className="font-headline text-[10px] px-6 py-3 border-2 border-primary text-primary hover:bg-accent hover:text-accent-foreground flex flex-col items-center gap-2 w-40 h-28 justify-center"
         >
             <span className="text-2xl">{emoji}</span>
