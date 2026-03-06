@@ -17,6 +17,7 @@ import Quests from './Quests';
 import Bizcard from './Bizcard';
 import SecretMessage from './SecretMessage';
 import Startups from './Startups';
+import PitchDeck from './PitchDeck';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -36,9 +37,10 @@ const pageMap: { [key: string]: React.ComponentType } = {
   terminal: Terminal,
   trash: Trash,
   'about-os': AboutOS,
+  pitch: PitchDeck,
 };
 
 export const getPageComponent = (id: string): React.ComponentType | null => {
-  const cleanId = id.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '');
+  const cleanId = id.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '').replace('.deck', '');
   return pageMap[cleanId] || null;
 };

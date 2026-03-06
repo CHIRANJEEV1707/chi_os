@@ -6,6 +6,7 @@ export const DESKTOP_ICONS = [
     { "id": "skills", "label": "SKILLS.sys", "icon": "⚙️" },
     { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
     { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
+    { "id": "pitch", "label": "PITCH.deck", "icon": "📊" },
     { "id": "contact", "label": "CONTACT.sh", "icon": "📡" },
     { "id": "chiru-bot", "label": "CHIRU-BOT.ai", "icon": "🤖" },
     { "id": "games", "label": "GAMES/", "icon": "🕹️" },
@@ -31,6 +32,7 @@ export const INITIAL_ICON_POSITIONS = [
     { id: 'contact', position: { x: 120, y: 136 } },
     { id: 'guestbook', position: { x: 120, y: 248 } },
     { id: 'resume', position: { x: 120, y: 360 } },
+    { id: 'pitch', position: { x: 120, y: 472 } },
     // Right side (negative values are offsets from right/bottom)
     { id: 'games', position: { x: -120, y: 24 } },
     { id: 'achievements', position: { x: -120, y: 136 } },

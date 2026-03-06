@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -234,6 +235,11 @@
   animation: glitch 0.6s cubic-bezier(.25, .46, .45, .94) both;
 }
 
+@keyframes slide-wipe {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
 
 @layer components {
     /* Print Modal Styles */
@@ -310,6 +316,14 @@
         @apply bg-[#000a00];
         border: 1px solid #002200;
     }
+
+    .bg-grid-pattern {
+        background-image:
+            linear-gradient(to right, hsla(var(--primary), 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, hsla(var(--primary), 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
 
     /* Print-specific Styles */
     @media print {
