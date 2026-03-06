@@ -240,6 +240,20 @@
     to { width: 100%; }
 }
 
+@keyframes ping-pulse-anim {
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+.ping-pulse-outer {
+  transform-origin: center;
+  animation: ping-pulse-anim 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  stroke: hsl(var(--primary));
+  fill: transparent;
+  stroke-width: 1px;
+}
+
 
 @layer components {
     /* Print Modal Styles */

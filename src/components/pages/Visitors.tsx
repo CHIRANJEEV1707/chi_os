@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Globe, MapPin, Users, Calendar } from 'lucide-react';
-import { formatDistanceToNowStrict } from 'date-fns';
-import { mockVisitorData, type Visitor } from '@/lib/visitorsData';
+import { formatDistanceToNowStrict, isToday } from 'date-fns';
+import { useVisitorStore } from '@/store/visitorStore';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const MAP_WIDTH = 1000;
@@ -13,14 +13,21 @@ const MAP_HEIGHT = 500;
 
 // A simple equirectangular projection
 const project = (lat: number, lng: number) => {
+    if (typeof lat !== 'number' || typeof lng !== 'number') return { x: -1, y: -1 };
     const x = (lng + 180) * (MAP_WIDTH / 360);
     const y = (90 - lat) * (MAP_HEIGHT / 180);
     return { x, y };
 };
 
 const getFlagEmoji = (countryCode: string) => {
-    // Flag emojis are supported by mapping country codes to regional indicator symbols
-    return String.fromCodePoint(...[...countryCode.toUpperCase()].map(char => 0x1F1A5 + char.charCodeAt(0)));
+    if (!countryCode) return '🌍';
+    try {
+        return countryCode
+            .toUpperCase()
+            .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt(0)));
+    } catch {
+        return '🌍';
+    }
 };
 
 const WorldMapSVG = () => (
@@ -42,52 +49,38 @@ const StatCard = ({ icon, label, value }: { icon: React.ReactNode, label: string
 );
 
 export default function Visitors() {
-    const [visitors, setVisitors] = useState<Visitor[]>([]);
-    const [mapDots, setMapDots] = useState<any[]>([]);
-
-    useEffect(() => {
-        // Simulate loading data and new visitors appearing
-        setVisitors(mockVisitorData);
-        
-        const interval = setInterval(() => {
-            const newVisitor = {
-                ...mockVisitorData[Math.floor(Math.random() * mockVisitorData.length)],
-                id: Date.now().toString(),
-                timestamp: new Date()
-            };
-            setVisitors(prev => [newVisitor, ...prev].slice(0, 50));
-        }, 8000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    useEffect(() => {
-        const cityData: Record<string, { lat: number, lng: number, count: number, country: string, country_code: string }> = {};
+    const { visitors, currentVisitor } = useVisitorStore();
+    
+    const mapDots = useMemo(() => {
+        const cityData: Record<string, { lat: number; lng: number; count: number, country: string, country_code: string, lastVisit: Date | undefined }> = {};
         visitors.forEach(v => {
             if (!cityData[v.city]) {
-                cityData[v.city] = { lat: v.lat, lng: v.lng, count: 0, country: v.country, country_code: v.country_code };
+                cityData[v.city] = { lat: v.lat, lng: v.lng, count: 0, country: v.country, country_code: v.country_code, lastVisit: undefined };
             }
             cityData[v.city].count++;
+            const visitTimestamp = v.timestamp;
+            if (!cityData[v.city].lastVisit || visitTimestamp > cityData[v.city].lastVisit!) {
+                cityData[v.city].lastVisit = visitTimestamp;
+            }
         });
 
-        const dots = Object.entries(cityData).map(([city, data]) => {
+        return Object.entries(cityData).map(([city, data]) => {
             const { x, y } = project(data.lat, data.lng);
             return {
-                id: city,
-                x,
-                y,
-                size: Math.min(4 + data.count * 0.5, 10),
+                id: city, x, y,
+                size: Math.min(3 + data.count, 10),
                 label: `${getFlagEmoji(data.country_code)} ${city}, ${data.country}`,
                 count: data.count,
-                lastVisit: visitors.find(v => v.city === city)?.timestamp
+                lastVisit: data.lastVisit,
+                isCurrent: currentVisitor?.city === city
             };
-        });
-        setMapDots(dots);
-    }, [visitors]);
+        }).filter(dot => dot.x > 0 && dot.y > 0);
+    }, [visitors, currentVisitor]);
 
     const totalVisits = visitors.length;
     const totalCities = useMemo(() => new Set(visitors.map(v => v.city)).size, [visitors]);
     const totalCountries = useMemo(() => new Set(visitors.map(v => v.country)).size, [visitors]);
+    const todayVisits = useMemo(() => visitors.filter(v => isToday(v.timestamp)).length, [visitors]);
     
     return (
         <div className="p-2 font-body h-full flex flex-col">
@@ -104,41 +97,42 @@ export default function Visitors() {
                 <StatCard icon={<Globe size={16} />} label="TOTAL VISITS" value={totalVisits} />
                 <StatCard icon={<MapPin size={16} />} label="UNIQUE CITIES" value={totalCities} />
                 <StatCard icon={<Users size={16} />} label="COUNTRIES" value={totalCountries} />
-                <StatCard icon={<Calendar size={16} />} label="TODAY" value={Math.floor(totalVisits / 4)} />
+                <StatCard icon={<Calendar size={16} />} label="TODAY" value={todayVisits} />
             </div>
 
             <div className="flex-grow relative bg-black border border-primary/20">
                 <WorldMapSVG />
-                <TooltipProvider>
+                <svg width={MAP_WIDTH} height={MAP_HEIGHT} viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} className="absolute inset-0">
+                  <TooltipProvider>
                     {mapDots.map(dot => (
                         <Tooltip key={dot.id}>
                             <TooltipTrigger asChild>
-                                <div 
-                                    className="absolute rounded-full bg-primary animate-pulse"
-                                    style={{ 
-                                        left: dot.x, 
-                                        top: dot.y, 
-                                        width: dot.size, 
-                                        height: dot.size,
-                                        transform: 'translate(-50%, -50%)',
-                                        boxShadow: '0 0 6px hsl(var(--primary))'
-                                    }}
-                                />
+                                <g transform={`translate(${dot.x}, ${dot.y})`}>
+                                   {dot.isCurrent && (
+                                     <circle r={dot.size} fill="#39ff14" className="ping-pulse-outer" />
+                                   )}
+                                   <circle
+                                        r={dot.size}
+                                        fill={dot.isCurrent ? '#39ff14' : '#00ff41'}
+                                        style={{ filter: `drop-shadow(0 0 3px ${dot.isCurrent ? '#39ff14' : '#00ff41'})`}}
+                                    />
+                                </g>
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p className="font-headline text-base">{dot.label}</p>
-                                <p className="text-sm">{dot.count} visits</p>
+                                <p className="text-sm">{dot.count} visit{dot.count > 1 ? 's' : ''}</p>
                                 {dot.lastVisit && <p className="text-xs text-muted-foreground">Last visit: {formatDistanceToNowStrict(dot.lastVisit, { addSuffix: true })}</p>}
                             </TooltipContent>
                         </Tooltip>
                     ))}
-                </TooltipProvider>
+                  </TooltipProvider>
+                </svg>
             </div>
 
             <div className="h-24 flex-shrink-0 mt-2 border border-primary/20 bg-black/30 p-2 overflow-y-auto">
                 <div className="flex flex-col-reverse">
                     {visitors.slice(0, 50).map((v, i) => (
-                        <p key={v.id} className={cn("text-sm", i === 0 && 'text-green-400 animate-pulse')}>
+                        <p key={v.id} className={cn("text-sm", i === 0 && visitors.length > SEED_VISITORS.length && 'text-green-400 animate-pulse')}>
                             {getFlagEmoji(v.country_code)} {v.city}, {v.country} - {formatDistanceToNowStrict(v.timestamp, { addSuffix: true })}
                         </p>
                     ))}
