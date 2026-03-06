@@ -16,6 +16,7 @@ import Achievements from './Achievements';
 import Quests from './Quests';
 import Bizcard from './Bizcard';
 import SecretMessage from './SecretMessage';
+import Startups from './Startups';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -30,6 +31,7 @@ const pageMap: { [key: string]: React.ComponentType } = {
   achievements: Achievements,
   quests: Quests,
   bizcard: Bizcard,
+  startups: Startups,
   'secret-message': SecretMessage,
   terminal: Terminal,
   trash: Trash,

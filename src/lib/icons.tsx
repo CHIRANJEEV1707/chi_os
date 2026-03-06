@@ -21,11 +21,13 @@ import {
     Trash2,
     Mail,
     PenSquare,
+    Rocket,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
     folder: Folder,
     projects: Folder,
+    startups: Rocket,
     chip: Cpu,
     skills: Cpu,
     briefcase: Briefcase,

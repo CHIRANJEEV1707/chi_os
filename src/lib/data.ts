@@ -2,6 +2,7 @@
 export const DESKTOP_ICONS = [
     { "id": "about", "label": "ABOUT.exe", "icon": "👤" },
     { "id": "projects", "label": "PROJECTS/", "icon": "📁" },
+    { "id": "startups", "label": "STARTUPS/", "icon": "🚀" },
     { "id": "skills", "label": "SKILLS.sys", "icon": "⚙️" },
     { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
     { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
@@ -22,13 +23,14 @@ export const INITIAL_ICON_POSITIONS = [
     // Left column
     { id: 'about', position: { x: 24, y: 24 } },
     { id: 'projects', position: { x: 24, y: 136 } },
-    { id: 'skills', position: { x: 24, y: 248 } },
-    { id: 'experience', position: { x: 24, y: 360 } },
-    { id: 'resume', position: { x: 24, y: 472 } },
+    { id: 'startups', position: { x: 24, y: 248 } },
+    { id: 'skills', position: { x: 24, y: 360 } },
+    { id: 'experience', position: { x: 24, y: 472 } },
     // Second column
     { id: 'chiru-bot', position: { x: 120, y: 24 } },
     { id: 'contact', position: { x: 120, y: 136 } },
     { id: 'guestbook', position: { x: 120, y: 248 } },
+    { id: 'resume', position: { x: 120, y: 360 } },
     // Right side (negative values are offsets from right/bottom)
     { id: 'games', position: { x: -120, y: 24 } },
     { id: 'achievements', position: { x: -120, y: 136 } },
