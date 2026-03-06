@@ -1,7 +1,9 @@
+
 'use client';
 
+import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 
@@ -11,7 +13,7 @@ const LoginScreen = () => {
         play('click');
         const provider = new GoogleAuthProvider();
         try {
-            await signInWithPopup(auth, provider);
+            await signInWithRedirect(auth, provider);
         } catch (error) {
             console.error("Auth error", error);
         }
@@ -30,6 +32,19 @@ const LoginScreen = () => {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth();
+
+    useEffect(() => {
+        const handleRedirectResult = async () => {
+          try {
+            // The result is null if the user just landed on the page.
+            // It is not null if the user is returning from the redirect.
+            await getRedirectResult(auth);
+          } catch (error) {
+            console.error('Redirect result error:', error);
+          }
+        };
+        handleRedirectResult();
+      }, []);
 
     if (loading) {
         return <div className="w-full h-screen flex items-center justify-center bg-desktop-bg text-primary font-headline animate-pulse">LOADING...</div>;
