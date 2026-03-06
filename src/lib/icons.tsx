@@ -12,6 +12,7 @@ import {
     Cat,
     Copy,
     Info,
+    Bot,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
@@ -31,6 +32,8 @@ import {
     settings: Settings,
     refresh: RefreshCw,
     power: Power,
+    bot: Bot,
+    'chiru-bot': Bot,
     logo: Cat, // Placeholder for CHIRU-OS logo
     copy: Copy,
     'about-os': Info,

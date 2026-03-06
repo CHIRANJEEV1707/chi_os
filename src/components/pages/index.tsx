@@ -10,6 +10,7 @@ import Terminal from './Terminal';
 import Trash from './Trash';
 import React from 'react';
 import AboutOS from './AboutOS';
+import ChiruBot from './ChiruBot';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -17,7 +18,7 @@ const pageMap: { [key: string]: React.ComponentType } = {
   skills: Skills,
   experience: Experience,
   resume: Resume,
-  blog: Projects, // Placeholder
+  'chiru-bot': ChiruBot,
   contact: Contact,
   guestbook: Guestbook,
   games: Games,

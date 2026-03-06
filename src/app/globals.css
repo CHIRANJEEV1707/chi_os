@@ -200,6 +200,25 @@
   animation-fill-mode: forwards;
 }
 
+@keyframes idle-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.idle-bounce {
+    animation: idle-bounce 2s ease-in-out infinite;
+}
+
+@keyframes glitch {
+  2%, 64% { transform: translate(2px, 0) skew(0deg); }
+  4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+  62% { transform: translate(0, 0) skew(5deg); }
+}
+
+.glitch {
+  animation: glitch 0.5s linear infinite;
+}
+
 
 @layer components {
     /* Print Modal Styles */

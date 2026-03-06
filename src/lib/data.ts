@@ -5,7 +5,7 @@ export const DESKTOP_ICONS = [
     { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
     { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
     { "id": "contact", "label": "CONTACT.sh", "icon": "📡" },
-    { "id": "guestbook", "label": "GUESTBOOK.txt", "icon": "📖" },
+    { "id": "chiru-bot", "label": "CHIRU-BOT.ai", "icon": "🤖" },
     { "id": "games", "label": "GAMES/", "icon": "🕹️" },
     { "id": "terminal", "label": "TERMINAL.exe", "icon": ">_" },
     { "id": "trash", "label": "RECYCLE.bin", "icon": "🗑️" }
@@ -23,7 +23,7 @@ export const START_MENU_ITEMS = [
     { id: "about", "label": "About Chiranjeev", "icon": "user", "action": "open_window" },
     { id: "projects", "label": "Projects", "icon": "folder", "action": "open_window" },
     { id: "skills", "label": "Skills", "icon": "chip", "action": "open_window" },
-    { id: "experience", "label": "Experience", "icon": "briefcase", "action": "open_window" },
+    { id: "chiru-bot", "label": "AI Interview", "icon": "bot", "action": "open_window" },
     { id: "games", "label": "Games", "icon": "gamepad", "action": "open_window" },
     { id: "terminal", "label": "Terminal", "icon": "prompt", "action": "open_window" },
     { "divider": true },

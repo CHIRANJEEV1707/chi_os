@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Github, Linkedin, Mail, FileText } from 'lucide-react';
+import { Github, Linkedin, Mail, FileText, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Clock from './Clock';
 import StartMenu from './StartMenu';
@@ -19,6 +19,7 @@ const Taskbar = () => {
   const { isSoundEnabled, toggleSound } = useSoundStore();
   const { play } = useSoundEffect();
   const ContactPageComponent = getPageComponent('contact');
+  const ChiruBotPageComponent = getPageComponent('chiru-bot');
 
 
   const handleTabClick = (id: string, isMinimized: boolean) => {
@@ -43,6 +44,13 @@ const Taskbar = () => {
     if (ContactPageComponent) {
       play('windowOpen');
       openWindow('contact', 'CONTACT.sh', <ContactPageComponent />);
+    }
+  }
+  
+  const handleChiruBotClick = () => {
+    if (ChiruBotPageComponent) {
+      play('windowOpen');
+      openWindow('chiru-bot', 'CHIRU-BOT.ai — Interview Me', <ChiruBotPageComponent />);
     }
   }
 
@@ -102,6 +110,12 @@ const Taskbar = () => {
 
       <TooltipProvider>
         <div className="flex items-center gap-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={handleChiruBotClick} className="text-primary hover:text-accent"><Bot size={16} /></button>
+            </TooltipTrigger>
+            <TooltipContent side="top"><p>CHIRU-BOT.ai</p></TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <a href="https://github.com/chiranjeev-agarwal" target="_blank" rel="noopener noreferrer" onClick={() => play('click')} className="text-primary hover:text-accent"><Github size={16} /></a>
