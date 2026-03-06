@@ -20,7 +20,13 @@ const SUGGESTIONS = [
     "What do you do for fun?",
 ];
 
-const WELCOME_TEXT = "Hey! I'm CHIRU-BOT — an AI trained to answer as Chiranjeev would. Ask me anything: about his startups, product thinking, why he'd be a great PM, or just try 'roast me' if you're feeling brave. 👾";
+const WELCOME_MESSAGE = {
+  id: 'welcome',
+  role: 'assistant' as const,
+  content: "Hey! I'm CHIRU-BOT — an AI trained to answer as Chiranjeev would. Ask me anything: about his startups, product thinking, why he'd be a great PM, or just try 'roast me' if you're feeling brave. 👾",
+  isError: false,
+};
+
 
 const getDailyLimitKey = () => `chiru-bot-count-${new Date().toISOString().split('T')[0]}`;
 
@@ -69,7 +75,7 @@ const BotMessage = ({ content, isTyping, isError }: Omit<Message, 'role' | 'id'>
 };
 
 export default function ChiruBot() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [dailyCount, setDailyCount] = useState(0);
@@ -81,10 +87,6 @@ export default function ChiruBot() {
     const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const messageIdCounter = useRef(1);
 
-    const [welcomeDone, setWelcomeDone] = useState(false)
-    const [displayedWelcome, setDisplayedWelcome] = useState('')
-    const hasRun = useRef(false)
-
     useEffect(() => {
         const count = parseInt(localStorage.getItem(getDailyLimitKey()) || '0');
         setDailyCount(count);
@@ -92,26 +94,8 @@ export default function ChiruBot() {
     }, []);
 
     useEffect(() => {
-        if (hasRun.current) return
-        hasRun.current = true
-        
-        let i = 0
-        const interval = setInterval(() => {
-            i++
-            setDisplayedWelcome(WELCOME_TEXT.slice(0, i))
-            if(i % 4 === 0) play('click');
-            if (i >= WELCOME_TEXT.length) {
-                clearInterval(interval)
-                setWelcomeDone(true)
-            }
-        }, 18)
-        
-        return () => clearInterval(interval)
-    }, [play]);
-
-    useEffect(() => {
         scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
-    }, [messages, displayedWelcome]);
+    }, [messages]);
 
     useEffect(() => {
         return () => {
@@ -181,11 +165,12 @@ export default function ChiruBot() {
                 throw new Error(data.error || 'No response message from AI.');
             }
 
+            streamMessage(data.message, botMessageId);
+
             const newDailyCount = dailyCount + 1;
             setDailyCount(newDailyCount);
             localStorage.setItem(getDailyLimitKey(), newDailyCount.toString());
 
-            streamMessage(data.message, botMessageId);
         } catch (error: any) {
             const errorMessage = error?.message || "CONNECTION INTERRUPTED. Please try again.";
             setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, role: 'assistant', content: errorMessage, isError: true, isTyping: false } : m));
@@ -222,7 +207,7 @@ export default function ChiruBot() {
                     </div>
                 </div>
                 <div className="mt-2 flex gap-1 overflow-x-auto pb-1 h-6 items-center">
-                    {welcomeDone && suggestions.map((s,i) => (
+                    {suggestions.map((s,i) => (
                         <button key={i} onClick={() => handleChipClick(s)} className="font-headline text-[6px] text-primary/80 border border-primary/50 px-2 py-0.5 whitespace-nowrap hover:bg-accent hover:text-black">
                             {s}
                         </button>
@@ -230,18 +215,6 @@ export default function ChiruBot() {
                 </div>
             </header>
             <main ref={scrollRef} className="flex-grow p-2 overflow-y-auto bg-[#000a00] space-y-4">
-                 <div className="flex justify-start gap-2">
-                    <Bot className="w-4 h-4 text-primary/80 mt-4 flex-shrink-0" />
-                    <div className="max-w-[80%]">
-                        <p className="font-headline text-[6px] text-left ml-1 text-primary/70">CHIRU</p>
-                        <div className="bg-[#001200] border border-green-700 p-2">
-                            <p className={cn("font-body text-base whitespace-pre-wrap text-green-400")}>
-                                {displayedWelcome}
-                                {!welcomeDone && <span className="animate-pulse">█</span>}
-                            </p>
-                        </div>
-                    </div>
-                </div>
                 {messages.map((msg) => msg.role === 'user' ? <UserMessage key={msg.id} {...msg} /> : <BotMessage key={msg.id} {...msg} />)}
             </main>
             <footer className="p-2 border-t-2 border-primary/20 flex-shrink-0">
@@ -252,7 +225,7 @@ export default function ChiruBot() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={isLoading ? 'Waiting for response...' : 'Ask me anything...'}
-                        disabled={isLoading || !welcomeDone}
+                        disabled={isLoading}
                         maxLength={280}
                         className="flex-grow bg-transparent font-body text-base text-primary outline-none"
                     />
