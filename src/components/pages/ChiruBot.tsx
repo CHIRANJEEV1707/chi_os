@@ -3,6 +3,7 @@ import { Bot, Send, CircleDot } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
+import { useUiStore } from '@/store/uiStore';
 
 const SUGGESTIONS = [
     "What makes you different?",
@@ -103,11 +104,11 @@ export default function ChiruBot() {
     const [isRoasting, setIsRoasting] = useState(false);
     const [dailyCount, setDailyCount] = useState(0);
     const [suggestions, setSuggestions] = useState<string[]>([]);
+    const { triggerGlitch } = useUiStore();
     
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const messageIdCounter = useRef(1);
-    const chatWindowRef = useRef<HTMLDivElement>(null);
     const { play } = useSoundEffect();
 
     useEffect(() => {
@@ -146,15 +147,6 @@ export default function ChiruBot() {
         setSuggestions(newSuggestions.filter(s => s !== usedChip).slice(0, 3));
     }, [suggestions]);
 
-    useEffect(() => {
-        if (isRoasting && chatWindowRef.current) {
-            chatWindowRef.current.classList.add('glitch-active');
-            setTimeout(() => {
-                chatWindowRef.current?.classList.remove('glitch-active');
-            }, 500);
-        }
-    }, [isRoasting]);
-
     const streamMessage = useCallback((fullText: string, messageId: string) => {
         let index = 0;
         if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
@@ -179,10 +171,10 @@ export default function ChiruBot() {
                         ? { ...m, isTyping: false }
                         : m
                 ));
-                // We will get new suggestions when bot is not typing
+                getNewSuggestions();
             }
         }, 20);
-    }, [play, isRoasting]);
+    }, [play, isRoasting, getNewSuggestions]);
 
     const handleSend = async (messageContent: string) => {
         if (!messageContent.trim() || isBotTyping) return;
@@ -197,6 +189,7 @@ export default function ChiruBot() {
         if (isRoastMessage(messageContent)) {
             setIsRoasting(true);
             play('error');
+            triggerGlitch(600);
         }
 
         const userMessage: Message = { id: `user-${messageIdCounter.current++}`, role: 'user', content: messageContent };
@@ -251,7 +244,7 @@ export default function ChiruBot() {
     }
 
     return (
-        <div ref={chatWindowRef} className="h-full flex flex-col bg-[#050a05]">
+        <div className="h-full flex flex-col bg-[#050a05]">
             <header className="p-2 border-b-2 border-primary/20 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <BotAvatar isRoasting={isRoasting} isTyping={isBotTyping} />

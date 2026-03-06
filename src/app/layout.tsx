@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
+import GlobalEffects from '@/components/GlobalEffects';
 
 export const metadata: Metadata = {
   title: 'Chiranjeev Agarwal — CHIRU-OS Portfolio',
@@ -24,6 +25,7 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased overflow-hidden')}>
+        <GlobalEffects />
         <div className="fixed inset-0 h-full w-full scanlines vignette flicker">
           {children}
           <Toaster />
