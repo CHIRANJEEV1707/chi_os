@@ -6,6 +6,7 @@ export const DESKTOP_ICONS = [
     { "id": "startups", "label": "STARTUPS/", "icon": "🚀", "size": { "width": 680, "height": 560 } },
     { "id": "case-studies", "label": "CASE_STUDIES/", "icon": "🔬", "size": { "width": 680, "height": 520 } },
     { "id": "thoughts", "label": "THOUGHTS.log", "icon": "📝", "size": { "width": 500, "height": 520 } },
+    { "id": "visitors", "label": "VISITORS.map", "icon": "🌍", "size": { "width": 660, "height": 500 } },
     { "id": "skills", "label": "SKILLS.sys", "icon": "⚙️" },
     { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
     { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
@@ -47,7 +48,8 @@ export const INITIAL_ICON_POSITIONS = [
 
     // Second to last column on right
     { id: 'pitch', position: { x: -216, y: 24 } },
-    { id: 'guestbook', position: { x: -216, y: 136 } },
+    { id: 'visitors', position: { x: -216, y: 136 } },
+    { id: 'guestbook', position: { x: -216, y: 248 } },
     
     // Far bottom right
     { id: 'trash', position: { x: -120, y: -180 } },

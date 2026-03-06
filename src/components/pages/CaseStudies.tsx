@@ -168,14 +168,12 @@ const CaseStudyContent = ({ caseStudy }: { caseStudy: typeof caseStudiesData[0] 
             {/* Content */}
             <div ref={contentRef} className="flex-grow overflow-y-auto p-3 space-y-6">
                 <blockquote className="font-body text-lg italic text-primary/80 border-l-4 border-primary/50 pl-4">
-                    {/* UPDATE WITH REAL CONTENT */}
                     "{caseStudy.subtitle}"
                 </blockquote>
                 {caseStudy.sections.map((section, index) => (
                     <div key={section.title} ref={el => sectionRefs.current[index] = el} className="scroll-mt-4">
                         <h3 className="font-headline text-[7px] text-green-400 mb-2">&gt; {section.title}</h3>
                         <div className="font-body text-base text-primary/90 pl-4 border-l-2 border-dotted border-primary/20">
-                            {/* UPDATE WITH REAL CONTENT */}
                             {section.content}
                         </div>
                     </div>

@@ -26,6 +26,7 @@ import {
     Presentation,
     Search,
     NotebookText,
+    Globe,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
@@ -34,6 +35,7 @@ import {
     startups: Rocket,
     'case-studies': Search,
     thoughts: NotebookText,
+    visitors: Globe,
     chip: Cpu,
     skills: Cpu,
     briefcase: Briefcase,
@@ -69,7 +71,7 @@ import {
   };
   
   export const getLucideIcon = (iconName: string): LucideIcon => {
-    const iconKey = iconName.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '').replace('.deck', '').replace('.bin', '');
+    const iconKey = iconName.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '').replace('.deck', '').replace('.bin', '').replace('.map', '');
     return iconMap[iconKey] || iconMap.default;
   };
   
