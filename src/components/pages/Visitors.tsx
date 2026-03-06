@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -6,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Globe, Users, Calendar } from 'lucide-react';
 import { formatDistanceToNowStrict, isToday } from 'date-fns';
 import { useVisitorStore } from '@/store/visitorStore';
-import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -76,13 +75,13 @@ export default function Visitors() {
             {/* Header */}
             <header className="flex-shrink-0 bg-[#000a00] p-3 border-b border-[#002200]">
                 <div className="flex justify-between items-center">
-                    <p className="font-headline text-[7px] text-primary">&gt; VISITORS.map</p>
+                    <p className="font-headline text-[7px] text-primary">{'>'} VISITORS.map</p>
                     <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                         <p className="font-headline text-[6px] text-primary">LIVE</p>
                     </div>
                 </div>
-                <p className="font-body text-sm text-[#00b32c] mt-1">&gt; Tracking visitors from around the world</p>
+                <p className="font-body text-sm text-[#00b32c] mt-1">{'>'} Tracking visitors from around the world</p>
             </header>
             
             {/* Stats */}
@@ -100,52 +99,54 @@ export default function Visitors() {
                     projectionConfig={{ scale: 140 }}
                     style={{ width: '100%', height: 'auto', maxHeight: '240px' }}
                 >
-                    <Geographies geography={GEO_URL}>
-                        {({ geographies }) =>
-                        geographies.map(geo => (
-                            <Geography
-                                key={geo.rsmKey}
-                                geography={geo}
-                                fill="#001a00"
-                                stroke="#004400"
-                                strokeWidth={0.5}
-                                style={{
-                                    default: { outline: 'none' },
-                                    hover: { outline: 'none', fill: '#002800' },
-                                    pressed: { outline: 'none' }
-                                }}
-                            />
-                        ))
-                        }
-                    </Geographies>
-                    <TooltipProvider>
-                    {mapDots.map(dot => (
-                        <Tooltip key={dot.id}>
-                            <TooltipTrigger asChild>
-                                <Marker coordinates={dot.coordinates}>
-                                    {dot.isCurrent && <circle r={6} className="ping-pulse-outer" />}
-                                    <circle
-                                        r={dot.isCurrent ? 6 : 4}
-                                        fill={dot.isCurrent ? '#ff4141' : '#00ff41'}
-                                        style={{ filter: `drop-shadow(0 0 3px ${dot.isCurrent ? '#ff4141' : '#00ff41'})` }}
-                                    />
-                                </Marker>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p className="font-headline text-base">{dot.label}</p>
-                                <p className="text-sm">{dot.count} visit{dot.count > 1 ? 's' : ''}</p>
-                                {dot.lastVisit && <p className="text-xs text-muted-foreground">Last visit: {formatDistanceToNowStrict(dot.lastVisit, { addSuffix: true })}</p>}
-                            </TooltipContent>
-                        </Tooltip>
-                    ))}
-                    </TooltipProvider>
+                    <ZoomableGroup center={[0,20]} zoom={1}>
+                        <Geographies geography={GEO_URL}>
+                            {({ geographies }) =>
+                            geographies.map(geo => (
+                                <Geography
+                                    key={geo.rsmKey}
+                                    geography={geo}
+                                    fill="#001a00"
+                                    stroke="#004400"
+                                    strokeWidth={0.5}
+                                    style={{
+                                        default: { outline: 'none' },
+                                        hover: { outline: 'none', fill: '#002800' },
+                                        pressed: { outline: 'none' }
+                                    }}
+                                />
+                            ))
+                            }
+                        </Geographies>
+                        <TooltipProvider>
+                        {mapDots.map(dot => (
+                            <Tooltip key={dot.id}>
+                                <TooltipTrigger asChild>
+                                    <Marker coordinates={dot.coordinates}>
+                                        {dot.isCurrent && <circle r={6} className="ping-pulse-outer" />}
+                                        <circle
+                                            r={dot.isCurrent ? 6 : 4}
+                                            fill={dot.isCurrent ? '#ff4141' : '#00ff41'}
+                                            style={{ filter: `drop-shadow(0 0 3px ${dot.isCurrent ? '#ff4141' : '#00ff41'})` }}
+                                        />
+                                    </Marker>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="font-headline text-base">{dot.label}</p>
+                                    <p className="text-sm">{dot.count} visit{dot.count > 1 ? 's' : ''}</p>
+                                    {dot.lastVisit && <p className="text-xs text-muted-foreground">Last visit: {formatDistanceToNowStrict(dot.lastVisit, { addSuffix: true })}</p>}
+                                </TooltipContent>
+                            </Tooltip>
+                        ))}
+                        </TooltipProvider>
+                    </ZoomableGroup>
                 </ComposableMap>
                 <p className="absolute bottom-2 left-3 font-body text-[11px] text-[#003300]">🔴 = You are here</p>
             </div>
 
             {/* Feed */}
             <div className="flex-shrink-0 p-3 h-[180px] flex flex-col">
-                <p className="font-headline text-[6px] text-[#00b32c] mb-1">&gt; RECENT VISITORS</p>
+                <p className="font-headline text-[6px] text-[#00b32c] mb-1">{'>'} RECENT VISITORS</p>
                 <div className="flex-grow overflow-y-auto pr-2">
                     <div className="flex flex-col-reverse justify-end gap-0.5">
                         {visitors.slice(0, 50).map((v) => (
@@ -167,7 +168,7 @@ export default function Visitors() {
             </div>
 
             <footer className="text-center p-2 border-t border-[#002200] flex-shrink-0">
-                <p className="font-body text-[11px] text-[#002800]">&gt; No personal data stored. City-level only.</p>
+                <p className="font-body text-[11px] text-[#002800]">{'>'} No personal data stored. City-level only.</p>
             </footer>
         </div>
     );
