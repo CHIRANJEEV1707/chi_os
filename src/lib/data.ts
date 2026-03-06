@@ -4,6 +4,7 @@ export const DESKTOP_ICONS = [
     { "id": "about", "label": "ABOUT.exe", "icon": "👤" },
     { "id": "projects", "label": "PROJECTS/", "icon": "📁" },
     { "id": "startups", "label": "STARTUPS/", "icon": "🚀", "size": { "width": 680, "height": 560 } },
+    { "id": "blog", "label": "BLOG.log", "icon": "📰", "size": { "width": 720, "height": 560 } },
     { "id": "case-studies", "label": "CASE_STUDIES/", "icon": "🔬", "size": { "width": 680, "height": 520 } },
     { "id": "thoughts", "label": "THOUGHTS.log", "icon": "📝", "size": { "width": 500, "height": 520 } },
     { "id": "visitors", "label": "VISITORS.map", "icon": "🌍", "size": { "width": 660, "height": 500 } },
@@ -50,6 +51,7 @@ export const INITIAL_ICON_POSITIONS = [
     { id: 'pitch', position: { x: -216, y: 24 } },
     { id: 'visitors', position: { x: -216, y: 136 } },
     { id: 'guestbook', position: { x: -216, y: 248 } },
+    { id: 'blog', position: { x: -216, y: 360 } },
     
     // Far bottom right
     { id: 'trash', position: { x: -120, y: -180 } },
@@ -59,6 +61,7 @@ export const INITIAL_ICON_POSITIONS = [
 export const START_MENU_ITEMS = [
     { id: "about", "label": "About Chiranjeev", "icon": "user", "action": "open_window" },
     { id: "projects", "label": "Projects", "icon": "folder", "action": "open_window" },
+    { id: "blog", "label": "Blog", "icon": "newspaper", "action": "open_window" },
     { id: "skills", "label": "Skills", "icon": "chip", "action": "open_window" },
     { id: "chiru-bot", "label": "AI Interview", "icon": "bot", "action": "open_window" },
     { id: "games", "label": "Games", "icon": "gamepad", "action": "open_window" },

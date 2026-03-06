@@ -22,6 +22,7 @@ import PitchDeck from './PitchDeck';
 import CaseStudies from './CaseStudies';
 import Thoughts from './Thoughts';
 import Visitors from './Visitors';
+import Blog from './Blog';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -45,9 +46,10 @@ const pageMap: { [key: string]: React.ComponentType } = {
   pitch: PitchDeck,
   thoughts: Thoughts,
   visitors: Visitors,
+  blog: Blog,
 };
 
 export const getPageComponent = (id: string): React.ComponentType | null => {
-  const cleanId = id.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '').replace('.deck', '').replace('.map', '');
+  const cleanId = id.replace('.exe', '').replace('/', '').replace('.pdf', '').replace('.sh', '').replace('.sys', '').replace('.log', '').replace('.ai', '').replace('.deck', '').replace('.bin', '').replace('.map', '');
   return pageMap[cleanId] || null;
 };

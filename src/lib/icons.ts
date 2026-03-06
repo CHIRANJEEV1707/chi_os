@@ -27,6 +27,7 @@ import {
     Search,
     NotebookText,
     Globe,
+    Newspaper,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
@@ -36,6 +37,8 @@ import {
     'case-studies': Search,
     thoughts: NotebookText,
     visitors: Globe,
+    newspaper: Newspaper,
+    blog: Newspaper,
     chip: Cpu,
     skills: Cpu,
     briefcase: Briefcase,
