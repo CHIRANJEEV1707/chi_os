@@ -23,10 +23,17 @@ const SUGGESTIONS = [
 const getDailyLimitKey = () => `chiru-bot-count-${new Date().toISOString().split('T')[0]}`;
 
 type Message = {
+    id: string;
     role: 'user' | 'assistant';
     content: string;
     isTyping?: boolean;
     isError?: boolean;
+};
+
+const WELCOME_MESSAGE: Message = {
+    id: 'welcome-0',
+    role: 'assistant',
+    content: "Hey! I'm CHIRU-BOT — an AI trained to answer as Chiranjeev would. Ask me anything: about his startups, product thinking, why he'd be a great PM, or just try 'roast me' if you're feeling brave. 👾"
 };
 
 const UserMessage = ({ content }: { content: string }) => (
@@ -40,27 +47,7 @@ const UserMessage = ({ content }: { content: string }) => (
     </div>
 );
 
-const BotMessage = ({ content, isTyping, isError }: Omit<Message, 'role'>) => {
-    const { play } = useSoundEffect();
-    const [displayedContent, setDisplayedContent] = useState('');
-
-    useEffect(() => {
-        if (isTyping || !content) return;
-        
-        let i = 0;
-        const intervalId = setInterval(() => {
-            if (i < content.length) {
-                setDisplayedContent(content.substring(0, i + 1));
-                if (i % 5 === 0) play('click');
-                i++;
-            } else {
-                clearInterval(intervalId);
-            }
-        }, 20);
-
-        return () => clearInterval(intervalId);
-    }, [content, isTyping, play]);
-
+const BotMessage = ({ content, isTyping, isError }: Omit<Message, 'role' | 'id'>) => {
     return (
         <div className="flex justify-start gap-2">
             <Bot className="w-4 h-4 text-primary/80 mt-4 flex-shrink-0" />
@@ -77,7 +64,7 @@ const BotMessage = ({ content, isTyping, isError }: Omit<Message, 'role'>) => {
                             </div>
                         </div>
                     ) : (
-                         <p className={cn("font-body text-base whitespace-pre-wrap", isError ? 'text-destructive' : 'text-green-400')}>{displayedContent}</p>
+                         <p className={cn("font-body text-base whitespace-pre-wrap", isError ? 'text-destructive' : 'text-green-400')}>{content}</p>
                     )}
                 </div>
             </div>
@@ -86,7 +73,7 @@ const BotMessage = ({ content, isTyping, isError }: Omit<Message, 'role'>) => {
 };
 
 export default function ChiruBot() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [dailyCount, setDailyCount] = useState(0);
@@ -95,21 +82,12 @@ export default function ChiruBot() {
     const { play } = useSoundEffect();
     const { openWindow } = useWindowStore();
     const ContactPageComponent = getPageComponent('contact');
-    
+    const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const messageIdCounter = useRef(1);
+
     useEffect(() => {
-        // Load daily count
         const count = parseInt(localStorage.getItem(getDailyLimitKey()) || '0');
         setDailyCount(count);
-
-        // Set initial welcome message
-        setTimeout(() => {
-            setMessages([{
-                role: 'assistant',
-                content: "Hey! I'm CHIRU-BOT — an AI trained to answer as Chiranjeev would. Ask me anything: about his startups, product thinking, why he'd be a great PM, or just try 'roast me' if you're feeling brave. 👾"
-            }]);
-        }, 500);
-
-        // Set initial suggestions
         setSuggestions(SUGGESTIONS.sort(() => 0.5 - Math.random()).slice(0, 3));
     }, []);
 
@@ -117,25 +95,62 @@ export default function ChiruBot() {
         scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
     }, [messages]);
 
+    useEffect(() => {
+        return () => {
+          if (streamIntervalRef.current) {
+            clearInterval(streamIntervalRef.current);
+          }
+        };
+      }, []);
+
+    const streamMessage = useCallback((fullText: string, messageId: string) => {
+        let index = 0;
+        if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
+
+        streamIntervalRef.current = setInterval(() => {
+            if (index < fullText.length) {
+                index++;
+                if (index % 5 === 0) play('click');
+                setMessages(prev => prev.map(m =>
+                    m.id === messageId
+                        ? { ...m, content: fullText.slice(0, index) }
+                        : m
+                ));
+            } else {
+                if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
+                setMessages(prev => prev.map(m =>
+                    m.id === messageId
+                        ? { ...m, isTyping: false }
+                        : m
+                ));
+            }
+        }, 20);
+    }, [play]);
+
     const handleSend = async (messageContent: string) => {
         if (!messageContent.trim() || isLoading) return;
         
         if (dailyCount >= 20) {
-            setMessages(prev => [...prev, { role: 'user', content: messageContent }, { role: 'assistant', content: "You've used all your questions for today! Come back tomorrow or just email me directly 😄", isError: true }]);
+            const userMessage: Message = { id: `user-${messageIdCounter.current++}`, role: 'user', content: messageContent };
+            const errorMessage: Message = { id: `error-${messageIdCounter.current++}`, role: 'assistant', content: "You've used all your questions for today! Come back tomorrow or just email me directly 😄", isError: true };
+            setMessages(prev => [...prev, userMessage, errorMessage]);
             return;
         }
 
-        const newMessages: Message[] = [...messages, { role: 'user', content: messageContent }];
-        setMessages(newMessages);
+        const userMessage: Message = { id: `user-${messageIdCounter.current++}`, role: 'user', content: messageContent };
+        const botMessageId = `bot-${messageIdCounter.current++}`;
+        const botTypingMessage: Message = { id: botMessageId, role: 'assistant', content: '', isTyping: true };
+        
+        const newApiMessages = [...messages, userMessage];
+        setMessages(prev => [...prev, userMessage, botTypingMessage]);
         setInput('');
         setIsLoading(true);
-        setMessages(prev => [...prev, { role: 'assistant', content: '', isTyping: true }]);
 
         try {
             const res = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: newMessages.slice(-10) })
+                body: JSON.stringify({ messages: newApiMessages.map(({role, content}) => ({role, content})).slice(-10) })
             });
 
             if (!res.ok) throw new Error('Network response was not ok.');
@@ -145,9 +160,9 @@ export default function ChiruBot() {
             setDailyCount(newDailyCount);
             localStorage.setItem(getDailyLimitKey(), newDailyCount.toString());
 
-            setMessages(prev => prev.map(m => m.isTyping ? { role: 'assistant', content: data.message } : m));
+            streamMessage(data.message, botMessageId);
         } catch (error) {
-            setMessages(prev => prev.map(m => m.isTyping ? { role: 'assistant', content: "CONNECTION INTERRUPTED. Please try again.", isError: true } : m));
+            setMessages(prev => prev.map(m => m.id === botMessageId ? { ...m, role: 'assistant', content: "CONNECTION INTERRUPTED. Please try again.", isError: true, isTyping: false } : m));
         } finally {
             setIsLoading(false);
         }
@@ -156,7 +171,6 @@ export default function ChiruBot() {
     const handleChipClick = (chip: string) => {
         play('click');
         handleSend(chip);
-        // Cycle suggestions
         setSuggestions(prev => {
             const remaining = SUGGESTIONS.filter(s => !prev.includes(s));
             const newSuggestion = remaining[Math.floor(Math.random() * remaining.length)];
@@ -190,7 +204,7 @@ export default function ChiruBot() {
                 </div>
             </header>
             <main ref={scrollRef} className="flex-grow p-2 overflow-y-auto bg-[#000a00] space-y-4">
-                {messages.map((msg, i) => msg.role === 'user' ? <UserMessage key={i} {...msg} /> : <BotMessage key={i} {...msg} />)}
+                {messages.map((msg) => msg.role === 'user' ? <UserMessage key={msg.id} {...msg} /> : <BotMessage key={msg.id} {...msg} />)}
             </main>
             <footer className="p-2 border-t-2 border-primary/20 flex-shrink-0">
                 <form onSubmit={(e) => { e.preventDefault(); handleSend(input); }} className="flex items-center gap-2">
