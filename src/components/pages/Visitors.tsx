@@ -1,8 +1,9 @@
+
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Globe, Users, Calendar } from 'lucide-react';
+import { Globe, Users, Calendar, Plus, Minus } from 'lucide-react';
 import { formatDistanceToNowStrict, isToday } from 'date-fns';
 import { useVisitorStore } from '@/store/visitorStore';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
@@ -33,7 +34,22 @@ const StatCard = ({ icon, label, value }: { icon: React.ReactNode, label: string
 
 export default function Visitors() {
     const { visitors, currentVisitor } = useVisitorStore();
-    
+    const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
+
+    const handleZoomIn = () => {
+        if (position.zoom >= 8) return;
+        setPosition(pos => ({ ...pos, zoom: pos.zoom * 1.5 }));
+    };
+
+    const handleZoomOut = () => {
+        if (position.zoom <= 1) return;
+        setPosition(pos => ({ ...pos, zoom: Math.max(pos.zoom / 1.5, 1) }));
+    };
+
+    const handleMoveEnd = (position: { coordinates: [number, number], zoom: number }) => {
+        setPosition(position);
+    };
+
     const mapDots = useMemo(() => {
         const cityData: Record<string, { lat: number; lng: number; count: number, country: string, country_code: string, lastVisit: Date, isCurrent: boolean }> = {};
         
@@ -72,7 +88,6 @@ export default function Visitors() {
     
     return (
         <div className="p-0 font-body h-full flex flex-col overflow-y-auto bg-[#050a05]">
-            {/* Header */}
             <header className="flex-shrink-0 bg-[#000a00] p-3 border-b border-[#002200]">
                 <div className="flex justify-between items-center">
                     <p className="font-headline text-[7px] text-primary">{'>'} VISITORS.map</p>
@@ -84,7 +99,6 @@ export default function Visitors() {
                 <p className="font-body text-sm text-[#00b32c] mt-1">{'>'} Tracking visitors from around the world</p>
             </header>
             
-            {/* Stats */}
             <div className="flex-shrink-0 grid grid-cols-4 gap-2 p-3 border-b border-[#002200]">
                 <StatCard icon="🌍" label="TOTAL VISITS" value={totalVisits} />
                 <StatCard icon="🏙️" label="CITIES" value={totalCities} />
@@ -92,14 +106,17 @@ export default function Visitors() {
                 <StatCard icon="📅" label="TODAY" value={todayVisits} />
             </div>
 
-            {/* Map */}
             <div className="flex-grow relative bg-[#000800] border-b border-[#002200] p-2 flex items-center justify-center">
                 <ComposableMap
                     projection="geoNaturalEarth1"
                     projectionConfig={{ scale: 140 }}
                     style={{ width: '100%', height: 'auto', maxHeight: '240px' }}
                 >
-                    <ZoomableGroup center={[0,20]} zoom={1}>
+                    <ZoomableGroup
+                      zoom={position.zoom}
+                      center={position.coordinates}
+                      onMoveEnd={handleMoveEnd}
+                    >
                         <Geographies geography={GEO_URL}>
                             {({ geographies }) =>
                             geographies.map(geo => (
@@ -141,10 +158,17 @@ export default function Visitors() {
                         </TooltipProvider>
                     </ZoomableGroup>
                 </ComposableMap>
+                <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
+                    <button onClick={handleZoomIn} className="w-6 h-6 flex items-center justify-center bg-black/50 border border-primary/50 text-primary hover:bg-accent hover:text-black">
+                        <Plus size={14} />
+                    </button>
+                    <button onClick={handleZoomOut} className="w-6 h-6 flex items-center justify-center bg-black/50 border border-primary/50 text-primary hover:bg-accent hover:text-black">
+                        <Minus size={14} />
+                    </button>
+                </div>
                 <p className="absolute bottom-2 left-3 font-body text-[11px] text-[#003300]">🔴 = You are here</p>
             </div>
 
-            {/* Feed */}
             <div className="flex-shrink-0 p-3 h-[180px] flex flex-col">
                 <p className="font-headline text-[6px] text-[#00b32c] mb-1">{'>'} RECENT VISITORS</p>
                 <div className="flex-grow overflow-y-auto pr-2">
