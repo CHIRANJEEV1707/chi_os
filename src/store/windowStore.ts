@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { create } from 'zustand';
@@ -84,6 +85,9 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
           )
         };
       }
+      
+      const iconConfig = DESKTOP_ICONS.find(icon => icon.id === id);
+      const windowSize = (iconConfig as any)?.size || { width: 640, height: 420 };
 
       const newWindow: WindowState = {
         id,
@@ -91,7 +95,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
         content: finalContent,
         zIndex: highestZIndex + 1,
         position: { x: 150 + state.windows.length * 20, y: 100 + state.windows.length * 20 },
-        size: { width: 640, height: 420 },
+        size: windowSize,
         isMinimized: false,
         isMaximized: false,
       };

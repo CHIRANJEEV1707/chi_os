@@ -1,4 +1,5 @@
 
+
 import About from './About';
 import Projects from './Projects';
 import Skills from './Skills';
@@ -18,6 +19,7 @@ import Bizcard from './Bizcard';
 import SecretMessage from './SecretMessage';
 import Startups from './Startups';
 import PitchDeck from './PitchDeck';
+import CaseStudies from './CaseStudies';
 
 const pageMap: { [key: string]: React.ComponentType } = {
   about: About,
@@ -33,6 +35,7 @@ const pageMap: { [key: string]: React.ComponentType } = {
   quests: Quests,
   bizcard: Bizcard,
   startups: Startups,
+  'case-studies': CaseStudies,
   'secret-message': SecretMessage,
   terminal: Terminal,
   trash: Trash,

@@ -1,4 +1,5 @@
 
+
 import {
     User,
     Folder,
@@ -23,12 +24,14 @@ import {
     PenSquare,
     Rocket,
     Presentation,
+    Search,
   } from 'lucide-react';
   
   const iconMap: { [key: string]: LucideIcon } = {
     folder: Folder,
     projects: Folder,
     startups: Rocket,
+    'case-studies': Search,
     chip: Cpu,
     skills: Cpu,
     briefcase: Briefcase,

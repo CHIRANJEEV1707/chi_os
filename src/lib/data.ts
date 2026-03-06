@@ -1,18 +1,20 @@
 
+
 export const DESKTOP_ICONS = [
     { "id": "about", "label": "ABOUT.exe", "icon": "👤" },
     { "id": "projects", "label": "PROJECTS/", "icon": "📁" },
-    { "id": "startups", "label": "STARTUPS/", "icon": "🚀" },
+    { "id": "startups", "label": "STARTUPS/", "icon": "🚀", "size": { "width": 680, "height": 560 } },
+    { "id": "case-studies", "label": "CASE_STUDIES/", "icon": "🔬", "size": { "width": 680, "height": 520 } },
     { "id": "skills", "label": "SKILLS.sys", "icon": "⚙️" },
     { "id": "experience", "label": "EXPERIENCE/", "icon": "💼" },
     { "id": "resume", "label": "RESUME.pdf", "icon": "📄" },
-    { "id": "pitch", "label": "PITCH.deck", "icon": "📊" },
+    { "id": "pitch", "label": "PITCH.deck", "icon": "📊", "size": { "width": 680, "height": 480 } },
     { "id": "contact", "label": "CONTACT.sh", "icon": "📡" },
     { "id": "chiru-bot", "label": "CHIRU-BOT.ai", "icon": "🤖" },
     { "id": "games", "label": "GAMES/", "icon": "🕹️" },
     { "id": "achievements", "label": "AWARDS.log", "icon": "🏆" },
     { "id": "quests", "label": "QUESTS.exe", "icon": "📜" },
-    { "id": "bizcard", "label": "BIZCARD.exe", "icon": "💳" },
+    { "id": "bizcard", "label": "BIZCARD.exe", "icon": "💳", "size": { "width": 500, "height": 460 } },
     { "id": "terminal", "label": "TERMINAL.exe", "icon": ">_" },
     { "id": "trash", "label": "RECYCLE.bin", "icon": "🗑️" },
     { "id": "guestbook", "label": "GUESTBOOK.log", "icon": "✍️" }
@@ -25,12 +27,12 @@ export const INITIAL_ICON_POSITIONS = [
     { id: 'about', position: { x: 24, y: 24 } },
     { id: 'projects', position: { x: 24, y: 136 } },
     { id: 'startups', position: { x: 24, y: 248 } },
-    { id: 'skills', position: { x: 24, y: 360 } },
+    { id: 'case-studies', position: { x: 24, y: 360 } },
     { id: 'experience', position: { x: 24, y: 472 } },
     // Second column
     { id: 'chiru-bot', position: { x: 120, y: 24 } },
-    { id: 'contact', position: { x: 120, y: 136 } },
-    { id: 'guestbook', position: { x: 120, y: 248 } },
+    { id: 'skills', position: { x: 120, y: 136 } },
+    { id: 'contact', position: { x: 120, y: 248 } },
     { id: 'resume', position: { x: 120, y: 360 } },
     { id: 'pitch', position: { x: 120, y: 472 } },
     // Right side (negative values are offsets from right/bottom)
