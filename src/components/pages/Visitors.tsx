@@ -1,11 +1,10 @@
-
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Globe, Users, Calendar, Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { formatDistanceToNowStrict, isToday } from 'date-fns';
-import { useVisitorStore } from '@/store/visitorStore';
+import { useVisitors, Visitor } from '@/lib/hooks/useVisitors';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -33,8 +32,32 @@ const StatCard = ({ icon, label, value }: { icon: React.ReactNode, label: string
 );
 
 export default function Visitors() {
-    const { visitors, currentVisitor } = useVisitorStore();
+    const { visitors, loading, trackVisitor, currentVisitor } = useVisitors();
     const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
+
+    // Track current visitor on mount
+    useEffect(() => {
+        const track = async () => {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.city && data.latitude && data.longitude) {
+                        trackVisitor({
+                            city: data.city,
+                            country: data.country_name,
+                            country_code: data.country_code,
+                            lat: data.latitude,
+                            lng: data.longitude,
+                        });
+                    }
+                }
+            } catch {
+                // Silent fail
+            }
+        };
+        track();
+    }, [trackVisitor]);
 
     const handleZoomIn = () => {
         if (position.zoom >= 8) return;
@@ -53,15 +76,16 @@ export default function Visitors() {
     const mapDots = useMemo(() => {
         const cityData: Record<string, { lat: number; lng: number; count: number, country: string, country_code: string, lastVisit: Date, isCurrent: boolean }> = {};
         
-        visitors.forEach(v => {
+        visitors.forEach((v: Visitor) => {
             if (!v.city || !v.lat || !v.lng) return;
             const isCurrent = currentVisitor?.id === v.id;
             if (!cityData[v.city]) {
-                cityData[v.city] = { lat: v.lat, lng: v.lng, count: 0, country: v.country, country_code: v.country_code, lastVisit: v.timestamp, isCurrent: false };
+                cityData[v.city] = { lat: v.lat, lng: v.lng, count: 0, country: v.country, country_code: v.country_code, lastVisit: new Date(v.created_at), isCurrent: false };
             }
             cityData[v.city].count++;
-            if (v.timestamp > cityData[v.city].lastVisit) {
-                cityData[v.city].lastVisit = v.timestamp;
+            const visitDate = new Date(v.created_at);
+            if (visitDate > cityData[v.city].lastVisit) {
+                cityData[v.city].lastVisit = visitDate;
             }
             if (isCurrent) {
                 cityData[v.city].isCurrent = true;
@@ -82,9 +106,17 @@ export default function Visitors() {
     }, [visitors, currentVisitor]);
 
     const totalVisits = visitors.length;
-    const totalCities = useMemo(() => new Set(visitors.map(v => v.city)).size, [visitors]);
-    const totalCountries = useMemo(() => new Set(visitors.map(v => v.country)).size, [visitors]);
-    const todayVisits = useMemo(() => visitors.filter(v => isToday(v.timestamp)).length, [visitors]);
+    const totalCities = useMemo(() => new Set(visitors.map((v: Visitor) => v.city)).size, [visitors]);
+    const totalCountries = useMemo(() => new Set(visitors.map((v: Visitor) => v.country)).size, [visitors]);
+    const todayVisits = useMemo(() => visitors.filter((v: Visitor) => isToday(new Date(v.created_at))).length, [visitors]);
+
+    if (loading) {
+        return (
+            <div className="p-4 font-body h-full flex items-center justify-center bg-[#050a05]">
+                <p className="text-primary text-lg animate-pulse">&gt; LOADING VISITOR MAP...<span className="ml-1">█</span></p>
+            </div>
+        );
+    }
     
     return (
         <div className="p-0 font-body h-full flex flex-col overflow-y-auto bg-[#050a05]">
@@ -173,8 +205,8 @@ export default function Visitors() {
                 <p className="font-headline text-[6px] text-[#00b32c] mb-1">{'>'} RECENT VISITORS</p>
                 <div className="flex-grow overflow-y-auto pr-2">
                     <div className="flex flex-col-reverse justify-end gap-0.5">
-                        {visitors.slice(0, 50).map((v) => (
-                             <div key={v.id} className={cn(
+                        {visitors.slice(0, 50).map((v: Visitor, idx: number) => (
+                             <div key={v.id || idx} className={cn(
                                 "flex justify-between items-center text-sm p-1 animate-in fade-in slide-in-from-top-2 duration-300",
                                 currentVisitor?.id === v.id && "bg-[#001a00] border-l-2 border-primary"
                              )}>
@@ -183,7 +215,7 @@ export default function Visitors() {
                                     {getFlagEmoji(v.country_code)} {v.city}, {v.country}
                                 </span>
                                 <span className="text-[#004400]">
-                                    {formatDistanceToNowStrict(v.timestamp, { addSuffix: true })}
+                                    {formatDistanceToNowStrict(new Date(v.created_at), { addSuffix: true })}
                                 </span>
                             </div>
                         ))}

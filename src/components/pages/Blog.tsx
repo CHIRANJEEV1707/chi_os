@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { getBlogPosts } from '@/lib/firestore';
+import { useState } from 'react';
+import { useBlogPosts, BlogPost } from '@/lib/hooks/useBlogPosts';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { useSoundEffect } from '@/hooks/useSoundEffect';
 
 const LoadingState = () => (
     <div className="p-4 font-body h-full flex items-center justify-center">
-        <p className="text-primary text-lg animate-pulse">&gt; LOADING BLOG.log...</p>
+        <p className="text-primary text-lg animate-pulse">&gt; LOADING BLOG.log...<span className="ml-1">█</span></p>
     </div>
 );
 
@@ -19,7 +19,7 @@ const EmptyState = () => (
     </div>
 );
 
-const PostListView = ({ posts, onSelectPost }: { posts: any[], onSelectPost: (post: any) => void }) => {
+const PostListView = ({ posts, onSelectPost }: { posts: BlogPost[], onSelectPost: (post: BlogPost) => void }) => {
     const { play } = useSoundEffect();
     return (
         <div className="p-4 font-body h-full overflow-y-auto">
@@ -35,7 +35,7 @@ const PostListView = ({ posts, onSelectPost }: { posts: any[], onSelectPost: (po
                         className="text-left p-2 hover:bg-accent/10 w-full"
                     >
                         <p className="font-headline text-[8px] text-primary">
-                            <span className="text-primary/60">{format(post.createdAt.toDate(), 'yyyy-MM-dd')}</span>
+                            <span className="text-primary/60">{format(new Date(post.created_at), 'yyyy-MM-dd')}</span>
                             <span className="mx-2 text-primary/40">|</span>
                             {(post.tags || []).map((tag: string) => (
                                 <span key={tag} className="mr-2 text-green-400">#{tag.toUpperCase()}</span>
@@ -49,7 +49,7 @@ const PostListView = ({ posts, onSelectPost }: { posts: any[], onSelectPost: (po
     );
 };
 
-const PostDetailView = ({ post, onBack }: { post: any, onBack: () => void }) => {
+const PostDetailView = ({ post, onBack }: { post: BlogPost, onBack: () => void }) => {
     const { play } = useSoundEffect();
     return (
         <div className="p-4 font-body h-full flex flex-col overflow-hidden">
@@ -57,8 +57,8 @@ const PostDetailView = ({ post, onBack }: { post: any, onBack: () => void }) => 
                 <button onClick={() => { play('click'); onBack(); }} className="font-headline text-[8px] text-primary/70 hover:text-primary mb-4">&lt; BACK TO LOG</button>
                 <h1 className="font-headline text-[10px] text-primary">{post.title}</h1>
                 <div className="flex items-center gap-4 font-body text-sm text-primary/60 my-2">
-                    <span>{format(post.createdAt.toDate(), 'MMMM dd, yyyy')}</span>
-                    <span>{post.readTime || 5} min read</span>
+                    <span>{format(new Date(post.created_at), 'MMMM dd, yyyy')}</span>
+                    <span>{post.read_time || 5} min read</span>
                     <div className="flex gap-2">
                         {(post.tags || []).map((tag: string) => <span key={tag} className="text-green-400">#{tag}</span>)}
                     </div>
@@ -83,23 +83,8 @@ const PostDetailView = ({ post, onBack }: { post: any, onBack: () => void }) => 
 }
 
 export default function Blog() {
-    const [posts, setPosts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedPost, setSelectedPost] = useState<any | null>(null);
-
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const fetchedPosts = await getBlogPosts();
-                setPosts(fetchedPosts);
-            } catch (error) {
-                console.error("Failed to fetch blog posts:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPosts();
-    }, []);
+    const { posts, loading } = useBlogPosts();
+    const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
 
     if (loading) return <LoadingState />;
 

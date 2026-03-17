@@ -1,16 +1,20 @@
-
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Heart, Link as LinkIcon, Check } from 'lucide-react';
-import { thoughtsData as initialThoughts, ThoughtCategory, Thought } from '@/lib/thoughtsData';
+import { useThoughts, ThoughtEntry } from '@/lib/hooks/useThoughts';
 import { formatDistanceToNow } from 'date-fns';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 
+type ThoughtCategory = 'PRODUCT' | 'STARTUPS' | 'TECH' | 'RANDOM';
 type Filter = ThoughtCategory | 'ALL';
 
-const categoryStyles: Record<ThoughtCategory, { color: string, border: string }> = {
+const categoryStyles: Record<string, { color: string, border: string }> = {
+    product: { color: 'hsl(var(--primary))', border: 'border-primary' },
+    startups: { color: 'hsl(var(--accent))', border: 'border-accent' },
+    tech: { color: 'hsl(180 100% 50%)', border: 'border-cyan-400' },
+    random: { color: 'hsl(var(--destructive))', border: 'border-destructive' },
     PRODUCT: { color: 'hsl(var(--primary))', border: 'border-primary' },
     STARTUPS: { color: 'hsl(var(--accent))', border: 'border-accent' },
     TECH: { color: 'hsl(180 100% 50%)', border: 'border-cyan-400' },
@@ -26,17 +30,22 @@ const useLikes = () => {
             const storedLikes = localStorage.getItem('chiru-thoughts-likes');
             const likedMap = storedLikes ? JSON.parse(storedLikes) : {};
             setUserLiked(likedMap);
-
-            const initialDisplayLikes: Record<string, number> = {};
-            initialThoughts.forEach(t => {
-                initialDisplayLikes[t.id] = (likedMap[t.id] ? 1 : 0) + Math.floor(t.id.length + Math.random() * 5);
-            });
-            setLikes(initialDisplayLikes);
-
         } catch (e) {
             console.error('Failed to parse likes from localStorage', e);
         }
     }, []);
+
+    const initLikes = (thoughtIds: string[]) => {
+        setLikes(prev => {
+            const newLikes = { ...prev };
+            thoughtIds.forEach(id => {
+                if (!(id in newLikes)) {
+                    newLikes[id] = Math.floor(id.length + Math.random() * 5);
+                }
+            });
+            return newLikes;
+        });
+    };
 
     const toggleLike = (thoughtId: string) => {
         if (userLiked[thoughtId]) return;
@@ -57,11 +66,11 @@ const useLikes = () => {
         }));
     };
 
-    return { likes, userLiked, toggleLike };
+    return { likes, userLiked, toggleLike, initLikes };
 }
 
 const ThoughtCard = ({ thought, onLike, onShare, likeCount, isLiked, isNew }: { 
-    thought: Thought, 
+    thought: ThoughtEntry, 
     onLike: () => void, 
     onShare: () => void, 
     likeCount: number, 
@@ -70,7 +79,7 @@ const ThoughtCard = ({ thought, onLike, onShare, likeCount, isLiked, isNew }: {
 }) => {
     const [showCopied, setShowCopied] = useState(false);
     const { play } = useSoundEffect();
-    const style = categoryStyles[thought.category];
+    const style = categoryStyles[thought.category] || categoryStyles['random'];
     
     const handleShare = () => {
         play('click');
@@ -94,10 +103,10 @@ const ThoughtCard = ({ thought, onLike, onShare, likeCount, isLiked, isNew }: {
         )}>
             {isNew && <p className="font-headline text-[6px] text-green-400 mb-1 animate-pulse">&gt; NEW ENTRY</p>}
             <div className="flex justify-between items-center mb-2">
-                <span className="font-headline text-[7px] border px-1.5 py-0.5" style={{ color: style.color, borderColor: style.color }}>{thought.category}</span>
-                <span className="font-body text-xs text-primary/50">{formatDistanceToNow(thought.timestamp, { addSuffix: true })}</span>
+                <span className="font-headline text-[7px] border px-1.5 py-0.5" style={{ color: style.color, borderColor: style.color }}>{thought.category.toUpperCase()}</span>
+                <span className="font-body text-xs text-primary/50">{formatDistanceToNow(new Date(thought.created_at), { addSuffix: true })}</span>
             </div>
-            <p className="font-body text-lg text-primary/90 leading-relaxed">{thought.text}</p>
+            <p className="font-body text-lg text-primary/90 leading-relaxed">{thought.content}</p>
             <div className="mt-3 pt-2 border-t border-dashed border-[#002200] flex items-center justify-between text-xs font-headline">
                 <button 
                     onClick={handleLike} 
@@ -119,16 +128,30 @@ const ThoughtCard = ({ thought, onLike, onShare, likeCount, isLiked, isNew }: {
 
 
 export default function Thoughts() {
-    const [thoughts, setThoughts] = useState<Thought[]>(initialThoughts.slice(0, 4));
+    const { thoughts: fetchedThoughts, loading } = useThoughts();
+    const [displayedThoughts, setDisplayedThoughts] = useState<ThoughtEntry[]>([]);
     const [filter, setFilter] = useState<Filter>('ALL');
-    const { likes, userLiked, toggleLike } = useLikes();
-    const thoughtQueue = useRef<Thought[]>(initialThoughts.slice(4));
+    const { likes, userLiked, toggleLike, initLikes } = useLikes();
+    const thoughtQueue = useRef<ThoughtEntry[]>([]);
+    const initialized = useRef(false);
 
+    // Initialize display once fetched
+    useEffect(() => {
+        if (fetchedThoughts.length > 0 && !initialized.current) {
+            initialized.current = true;
+            const initial = fetchedThoughts.slice(0, 4);
+            setDisplayedThoughts(initial);
+            thoughtQueue.current = fetchedThoughts.slice(4);
+            initLikes(fetchedThoughts.map(t => t.id));
+        }
+    }, [fetchedThoughts, initLikes]);
+
+    // Rotating "live feed" interval
     useEffect(() => {
         const interval = setInterval(() => {
             if (thoughtQueue.current.length > 0) {
                 const nextThought = thoughtQueue.current.shift()!;
-                setThoughts(prev => [nextThought, ...prev]);
+                setDisplayedThoughts(prev => [nextThought, ...prev]);
                 thoughtQueue.current.push(nextThought);
             }
         }, 45000);
@@ -137,14 +160,22 @@ export default function Thoughts() {
     }, []);
 
     const filteredThoughts = useMemo(() => {
-        if (filter === 'ALL') return thoughts;
-        return thoughts.filter(t => t.category === filter);
-    }, [thoughts, filter]);
+        if (filter === 'ALL') return displayedThoughts;
+        return displayedThoughts.filter(t => t.category.toUpperCase() === filter);
+    }, [displayedThoughts, filter]);
 
-    const handleShare = (thought: Thought) => {
-        const text = `"${thought.text}"\n\n— Chiranjeev Agarwal\nRead more: https://chiruos.vercel.app`;
+    const handleShare = (thought: ThoughtEntry) => {
+        const text = `"${thought.content}"\n\n— Chiranjeev Agarwal\nRead more: https://chiruos.vercel.app`;
         navigator.clipboard.writeText(text);
     };
+
+    if (loading) {
+        return (
+            <div className="p-4 font-body h-full flex items-center justify-center">
+                <p className="text-primary text-lg animate-pulse">&gt; LOADING THOUGHTS...<span className="ml-1">█</span></p>
+            </div>
+        );
+    }
 
     return (
         <div className="p-2 font-body h-full flex flex-col">
@@ -169,19 +200,19 @@ export default function Thoughts() {
             <main className="flex-grow overflow-y-auto space-y-3 py-3 pr-1">
                 {filteredThoughts.map((thought, index) => (
                     <ThoughtCard 
-                        key={`${thought.id}-${thoughts.length}`} 
+                        key={`${thought.id}-${displayedThoughts.length}`} 
                         thought={thought}
                         onLike={() => toggleLike(thought.id)}
                         onShare={() => handleShare(thought)}
                         likeCount={likes[thought.id] || 0}
                         isLiked={!!userLiked[thought.id]}
-                        isNew={index === 0 && thoughts.length > 4}
+                        isNew={index === 0 && displayedThoughts.length > 4}
                     />
                 ))}
             </main>
 
             <footer className="flex-shrink-0 text-center border-t-2 border-primary/30 pt-2 font-body text-sm text-primary/70">
-                <p>&gt; {thoughts.length} THOUGHTS LOGGED SO FAR</p>
+                <p>&gt; {displayedThoughts.length} THOUGHTS LOGGED SO FAR</p>
                 <p>Want to discuss any of these? → <span className="underline">CONTACT.sh</span></p>
             </footer>
         </div>

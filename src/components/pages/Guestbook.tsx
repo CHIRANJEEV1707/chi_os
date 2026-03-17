@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { useAchievementStore } from '@/store/achievementStore';
 import { useQuestStore } from '@/store/questStore';
-import { addGuestbookEntry, getGuestbookEntries } from '@/lib/firestore';
+import { useGuestbook, GuestbookEntry } from '@/lib/hooks/useGuestbook';
 import { formatDistanceToNowStrict } from 'date-fns';
-import { Check, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 const guestbookSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50),
@@ -50,7 +50,7 @@ const PixelAvatar = ({ name, size = 32 }: { name: string, size?: number }) => {
 };
 
 const BadgeModal = ({ badgeData, onClose }: { badgeData: any; onClose: () => void }) => {
-    const canvasRef = React.useRef<HTMLCanvasElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const [status, setStatus] = useState<'generating' | 'done'>('generating');
 
     useEffect(() => {
@@ -124,9 +124,14 @@ const BadgeModal = ({ badgeData, onClose }: { badgeData: any; onClose: () => voi
         link.click();
     };
 
+    const handleShare = () => {
+        const text = `I just signed the CHIRU-OS Guestbook as Visitor #${String(badgeData.visitorNum).padStart(3,'0')}! 🖥️\n\nCheck it out: https://chiruos.vercel.app`;
+        navigator.clipboard.writeText(text);
+    };
+
     return (
         <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4">
-            <div className="w-full max-w-lg bg-window-bg border-2 border-amber-400 p-4 text-center flex flex-col items-center">
+            <div className="w-full max-w-lg bg-window-bg border-2 border-amber-400 p-4 text-center flex flex-col items-center relative">
                 {status === 'generating' ? (
                     <>
                         <p className="font-headline text-[8px] text-green-400">&gt; TRANSMISSION RECEIVED!</p>
@@ -138,7 +143,7 @@ const BadgeModal = ({ badgeData, onClose }: { badgeData: any; onClose: () => voi
                         <canvas ref={canvasRef} width={400} height={200} className="border-2 border-primary" style={{boxShadow: '0 0 15px hsl(var(--primary))'}} />
                         <div className="mt-4 flex gap-2">
                              <button onClick={handleDownload} className="font-headline text-[7px] px-3 py-1 border-2 border-primary/50 text-primary hover:bg-accent hover:text-accent-foreground">[ ⬇ DOWNLOAD BADGE ]</button>
-                             <button onClick={() => {}} className="font-headline text-[7px] px-3 py-1 border-2 border-primary/50 text-primary hover:bg-accent hover:text-accent-foreground">[ 🔗 SHARE ]</button>
+                             <button onClick={handleShare} className="font-headline text-[7px] px-3 py-1 border-2 border-primary/50 text-primary hover:bg-accent hover:text-accent-foreground">[ 🔗 SHARE ]</button>
                         </div>
                     </>
                 )}
@@ -156,23 +161,22 @@ export default function Guestbook() {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<GuestbookFormData>({
         resolver: zodResolver(guestbookSchema)
     });
-    const [entries, setEntries] = useState<any[]>([]);
+    const { entries, loading, addEntry } = useGuestbook();
     const [status, setStatus] = useState<'idle' | 'submitting'>('idle');
     const [badgeData, setBadgeData] = useState<any | null>(null);
-
-    useEffect(() => {
-        const unsubscribe = getGuestbookEntries(setEntries);
-        return () => unsubscribe();
-    }, []);
 
     const onSubmit: SubmitHandler<GuestbookFormData> = async (data) => {
         setStatus('submitting');
         play('success');
         try {
-            const { id, visitorNum } = await addGuestbookEntry(data);
+            const result = await addEntry({
+                name: data.name,
+                message: data.message,
+                location: data.location || undefined,
+            });
             unlock('signed');
             completeTask('sign_guestbook');
-            setBadgeData({ ...data, visitorNum });
+            setBadgeData({ ...data, visitorNum: result.visitorNum || result.visitor_num });
             reset();
         } catch (error) {
             console.error("Error signing guestbook:", error);
@@ -183,6 +187,14 @@ export default function Guestbook() {
     };
     
     const handleFormError = () => play('error');
+
+    if (loading) {
+        return (
+            <div className="p-4 font-body h-full flex items-center justify-center">
+                <p className="text-primary text-lg animate-pulse">&gt; LOADING GUESTBOOK...<span className="ml-1">█</span></p>
+            </div>
+        );
+    }
 
     return (
         <div className="p-4 font-body h-full flex flex-col">
@@ -203,14 +215,14 @@ export default function Guestbook() {
             </form>
 
             <div className="flex-grow overflow-y-auto space-y-2 pr-2">
-                {entries.map(entry => (
+                {entries.map((entry: GuestbookEntry) => (
                     <div key={entry.id} className="p-3 bg-[#000a00] border border-[#002200] border-l-4 border-primary/70">
                          <div className="flex justify-between items-center text-primary/70 mb-1">
                             <p className="font-headline text-[8px]">
-                                <span className="text-amber-400">#{String(entry.visitorNum).padStart(3, '0')}</span> {entry.name}
+                                <span className="text-amber-400">#{String(entry.visitor_num || 0).padStart(3, '0')}</span> {entry.name}
                                 {entry.location && <span className="text-primary/50"> from {entry.location}</span>}
                             </p>
-                            <p className="text-xs">{entry.createdAt ? formatDistanceToNowStrict(entry.createdAt.toDate(), { addSuffix: true }) : 'just now'}</p>
+                            <p className="text-xs">{entry.created_at ? formatDistanceToNowStrict(new Date(entry.created_at), { addSuffix: true }) : 'just now'}</p>
                          </div>
                          <p className="font-body text-base text-primary/90 ml-4">"{entry.message}"</p>
                          <div className="flex items-center gap-2 mt-2 ml-4">
