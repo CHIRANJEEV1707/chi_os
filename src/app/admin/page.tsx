@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { cn } from '@/lib/utils';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { useForm } from 'react-hook-form';
@@ -792,10 +790,10 @@ export default function AdminPage() {
     const [activeSection, setActiveSection] = useState<AdminSection>('blog');
     const { play } = useSoundEffect();
     
-    const handleSignOut = async () => {
+    const handleSignOut = () => {
         play('windowClose');
-        await signOut(auth);
-        window.location.href = '/';
+        sessionStorage.removeItem('chiru-admin-auth');
+        window.location.reload();
     };
 
     const renderSection = () => {
